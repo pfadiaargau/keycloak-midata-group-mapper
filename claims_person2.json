@@ -1,0 +1,1824 @@
+{
+    "sub": "2",
+    "email": "hussein_kohlmann@hitobito.example.com",
+    "first_name": "Hussein",
+    "last_name": "bbbb",
+    "nickname": "Consequuntur",
+    "address": "Strasseweg 15",
+    "address_care_of": null,
+    "street": "Strasseweg",
+    "housenumber": "15",
+    "postbox": null,
+    "zip_code": "3312",
+    "town": "Ortschaft2",
+    "country": "CH",
+    "company_name": null,
+    "company": false,
+    "gender": "m",
+    "birthday": "1999-12-30",
+    "language": "fr",
+    "primary_group_id": 1,
+    "pronouns": "er / ihn",
+    "title": null,
+    "salutation": "sehr_geehrter_titel_nachname",
+    "prefers_digital_correspondence": false,
+    "kantonalverband_id": 1,
+    "roles": [
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::Selbstregistriert",
+            "role_class": "Group::Bund::Selbstregistriert",
+            "role_name": "Selbstregistrierte*r",
+            "permissions": []
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::Adressverwaltung",
+            "role_class": "Group::Bund::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::VerantwortungPr",
+            "role_class": "Group::Bund::VerantwortungPr",
+            "role_name": "Verantwortliche*r PR",
+            "permissions": [
+                "group_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::VerantwortungKrisenteam",
+            "role_class": "Group::Bund::VerantwortungKrisenteam",
+            "role_name": "Verantwortliche*r Krisenteam",
+            "permissions": [
+                "group_read",
+                "contact_data",
+                "crisis_trigger"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::MitarbeiterGs",
+            "role_class": "Group::Bund::MitarbeiterGs",
+            "role_name": "Mitarbeiter*in GS",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "admin"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::Adressverwaltung",
+            "role_class": "Group::Bund::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::ItSupport",
+            "role_class": "Group::Bund::ItSupport",
+            "role_name": "IT Support",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "admin",
+                "impersonation"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::Praesidium",
+            "role_class": "Group::Bund::Praesidium",
+            "role_name": "Präsident*in",
+            "permissions": [
+                "group_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::Webmaster",
+            "role_class": "Group::Bund::Webmaster",
+            "role_name": "Webmaster",
+            "permissions": [
+                "group_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::MitgliedKrisenteam",
+            "role_class": "Group::Bund::MitgliedKrisenteam",
+            "role_name": "Mitglied Krisenteam",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data",
+                "crisis_trigger"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::Sekretariat",
+            "role_class": "Group::Bund::Sekretariat",
+            "role_name": "Sekretariat",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::VerantwortungKrisenteam",
+            "role_class": "Group::Bund::VerantwortungKrisenteam",
+            "role_name": "Verantwortliche*r Krisenteam",
+            "permissions": [
+                "group_read",
+                "contact_data",
+                "crisis_trigger"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::VerantwortungPraeventionSexuellerAusbeutung",
+            "role_class": "Group::Bund::VerantwortungPraeventionSexuellerAusbeutung",
+            "role_name": "Verantwortliche*r Prävention",
+            "permissions": [
+                "group_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::Coach",
+            "role_class": "Group::Bund::Coach",
+            "role_name": "Coach",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::AssistenzAusbildung",
+            "role_class": "Group::Bund::AssistenzAusbildung",
+            "role_name": "Assistenz Ausbildung",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::Adressverwaltung",
+            "role_class": "Group::Bund::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::Geschaeftsleitung",
+            "role_class": "Group::Bund::Geschaeftsleitung",
+            "role_name": "Geschäftsleiter*in",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data",
+                "approve_applications"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::LeitungKernaufgabeAusbildung",
+            "role_class": "Group::Bund::LeitungKernaufgabeAusbildung",
+            "role_name": "Leiter*in Kernaufgabe Ausbildung",
+            "permissions": [
+                "layer_full",
+                "group_read",
+                "contact_data",
+                "approve_applications"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::LeitungKernaufgabeKommunikation",
+            "role_class": "Group::Bund::LeitungKernaufgabeKommunikation",
+            "role_name": "Leiter*in Kernaufgabe Kommunikation",
+            "permissions": [
+                "group_read",
+                "crisis_trigger"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::ItSupport",
+            "role_class": "Group::Bund::ItSupport",
+            "role_name": "IT Support",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "admin",
+                "impersonation"
+            ]
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::Ehrenmitglied",
+            "role_class": "Group::Bund::Ehrenmitglied",
+            "role_name": "Ehrenmitglied",
+            "permissions": []
+        },
+        {
+            "group_id": 1,
+            "group_name": "Pfadibewegung Schweiz",
+            "role": "Group::Bund::Passivmitglied",
+            "role_class": "Group::Bund::Passivmitglied",
+            "role_name": "Passivmitglied",
+            "permissions": []
+        },
+        {
+            "group_id": 2,
+            "group_name": "Pfadi Kanton Bern",
+            "role": "Group::Kantonalverband::VerantwortungKrisenteam",
+            "role_class": "Group::Kantonalverband::VerantwortungKrisenteam",
+            "role_name": "Verantwortliche*r Krisenteam",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data",
+                "crisis_trigger"
+            ]
+        },
+        {
+            "group_id": 2,
+            "group_name": "Pfadi Kanton Bern",
+            "role": "Group::Kantonalverband::VerantwortungAusbildung",
+            "role_class": "Group::Kantonalverband::VerantwortungAusbildung",
+            "role_name": "Verantwortliche*r Ausbildung",
+            "permissions": [
+                "layer_full",
+                "layer_and_below_read",
+                "contact_data",
+                "approve_applications"
+            ]
+        },
+        {
+            "group_id": 3,
+            "group_name": "Pfadi Züri",
+            "role": "Group::Kantonalverband::Adressverwaltung",
+            "role_class": "Group::Kantonalverband::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_and_below_full"
+            ]
+        },
+        {
+            "group_id": 15,
+            "group_name": "Stärn vo Buebeberg",
+            "role": "Group::Abteilung::Coach",
+            "role_class": "Group::Abteilung::Coach",
+            "role_name": "Coach",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 17,
+            "group_name": "Berchtold",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 17,
+            "group_name": "Berchtold",
+            "role": "Group::Abteilung::Kassier",
+            "role_class": "Group::Abteilung::Kassier",
+            "role_name": "Kassier*in",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 19,
+            "group_name": "Nünenen",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 19,
+            "group_name": "Nünenen",
+            "role": "Group::Abteilung::Coach",
+            "role_class": "Group::Abteilung::Coach",
+            "role_name": "Coach",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 19,
+            "group_name": "Nünenen",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 47,
+            "group_name": "Aarewacht Lyss",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 49,
+            "group_name": "Pfadi Luzern",
+            "role": "Group::Kantonalverband::Kantonsleitung",
+            "role_class": "Group::Kantonalverband::Kantonsleitung",
+            "role_name": "Kantonsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications"
+            ]
+        },
+        {
+            "group_id": 64,
+            "group_name": "Pfadi St. Gallen – Appenzell",
+            "role": "Group::Kantonalverband::Sekretariat",
+            "role_class": "Group::Kantonalverband::Sekretariat",
+            "role_name": "Sekretariat",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 64,
+            "group_name": "Pfadi St. Gallen – Appenzell",
+            "role": "Group::Kantonalverband::Adressverwaltung",
+            "role_class": "Group::Kantonalverband::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_and_below_full"
+            ]
+        },
+        {
+            "group_id": 69,
+            "group_name": "Dracheburg",
+            "role": "Group::Abteilung::Adressverwaltung",
+            "role_class": "Group::Abteilung::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 80,
+            "group_name": "Pfadi Thurgau",
+            "role": "Group::Kantonalverband::Sekretariat",
+            "role_class": "Group::Kantonalverband::Sekretariat",
+            "role_name": "Sekretariat",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 86,
+            "group_name": "Pfadi St.Martin",
+            "role": "Group::Abteilung::Redaktor",
+            "role_class": "Group::Abteilung::Redaktor",
+            "role_name": "Redaktor*in",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 144,
+            "group_name": "Katholischer Pfadfinder Korps",
+            "role": "Group::Region::Sekretariat",
+            "role_class": "Group::Region::Sekretariat",
+            "role_name": "Sekretariat",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 156,
+            "group_name": "Scouts Neuchâtelois",
+            "role": "Group::Kantonalverband::Kantonsleitung",
+            "role_class": "Group::Kantonalverband::Kantonsleitung",
+            "role_name": "Kantonsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications"
+            ]
+        },
+        {
+            "group_id": 166,
+            "group_name": "Pfadi Unterwalden",
+            "role": "Group::Kantonalverband::PowerUser",
+            "role_class": "Group::Kantonalverband::PowerUser",
+            "role_name": "PowerUser",
+            "permissions": [
+                "layer_and_below_full"
+            ]
+        },
+        {
+            "group_id": 202,
+            "group_name": "AG Lager",
+            "role": "Group::KantonalesGremium::Selbstregistriert",
+            "role_class": "Group::KantonalesGremium::Selbstregistriert",
+            "role_name": "Selbstregistrierte*r",
+            "permissions": []
+        },
+        {
+            "group_id": 212,
+            "group_name": "Angenstein",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 234,
+            "group_name": "AS Genevois",
+            "role": "Group::Kantonalverband::Adressverwaltung",
+            "role_class": "Group::Kantonalverband::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_and_below_full"
+            ]
+        },
+        {
+            "group_id": 234,
+            "group_name": "AS Genevois",
+            "role": "Group::Kantonalverband::Kantonsleitung",
+            "role_class": "Group::Kantonalverband::Kantonsleitung",
+            "role_name": "Kantonsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications"
+            ]
+        },
+        {
+            "group_id": 234,
+            "group_name": "AS Genevois",
+            "role": "Group::Kantonalverband::Adressverwaltung",
+            "role_class": "Group::Kantonalverband::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_and_below_full"
+            ]
+        },
+        {
+            "group_id": 234,
+            "group_name": "AS Genevois",
+            "role": "Group::Kantonalverband::Sekretariat",
+            "role_class": "Group::Kantonalverband::Sekretariat",
+            "role_name": "Sekretariat",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 243,
+            "group_name": "St. Mauritius",
+            "role": "Group::Abteilung::PowerUser",
+            "role_class": "Group::Abteilung::PowerUser",
+            "role_name": "PowerUser",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 262,
+            "group_name": "Abteilung Muster",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 326,
+            "group_name": "Pfadi Muur",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 333,
+            "group_name": "Bluestone",
+            "role": "Group::Abteilung::Adressverwaltung",
+            "role_class": "Group::Abteilung::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 367,
+            "group_name": "Pios",
+            "role": "Group::Pio::Mitleitung",
+            "role_class": "Group::Pio::Mitleitung",
+            "role_name": "Mitleiter*in",
+            "permissions": [
+                "layer_and_below_read"
+            ]
+        },
+        {
+            "group_id": 387,
+            "group_name": "Pfadiregion Glockenhof",
+            "role": "Group::Region::Kassier",
+            "role_class": "Group::Region::Kassier",
+            "role_name": "Kassier*in",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 387,
+            "group_name": "Pfadiregion Glockenhof",
+            "role": "Group::Region::Sekretariat",
+            "role_class": "Group::Region::Sekretariat",
+            "role_name": "Sekretariat",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 387,
+            "group_name": "Pfadiregion Glockenhof",
+            "role": "Group::Region::Regionalleitung",
+            "role_class": "Group::Region::Regionalleitung",
+            "role_name": "Regionsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 387,
+            "group_name": "Pfadiregion Glockenhof",
+            "role": "Group::Region::Rechnungen",
+            "role_class": "Group::Region::Rechnungen",
+            "role_name": "Rechnungen",
+            "permissions": [
+                "layer_and_below_read",
+                "finance",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 388,
+            "group_name": "Manegg",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 392,
+            "group_name": "Abteilung Hering",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 393,
+            "group_name": "Abt 2",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 397,
+            "group_name": "AS Jurassienne",
+            "role": "Group::Kantonalverband::Kassier",
+            "role_class": "Group::Kantonalverband::Kassier",
+            "role_name": "Kassier*in",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 398,
+            "group_name": "Abt 3",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 400,
+            "group_name": "Pfadi Aargau",
+            "role": "Group::Kantonalverband::Sekretariat",
+            "role_class": "Group::Kantonalverband::Sekretariat",
+            "role_name": "Sekretariat",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 423,
+            "group_name": "Scoutismo Ticino",
+            "role": "Group::Kantonalverband::VerantwortungAusbildung",
+            "role_class": "Group::Kantonalverband::VerantwortungAusbildung",
+            "role_name": "Verantwortliche*r Ausbildung",
+            "permissions": [
+                "layer_full",
+                "layer_and_below_read",
+                "contact_data",
+                "approve_applications"
+            ]
+        },
+        {
+            "group_id": 426,
+            "group_name": "Pfadi Kanton Schwyz",
+            "role": "Group::Kantonalverband::VerantwortungBetreuung",
+            "role_class": "Group::Kantonalverband::VerantwortungBetreuung",
+            "role_name": "Verantwortliche*r Betreuung",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 426,
+            "group_name": "Pfadi Kanton Schwyz",
+            "role": "Group::Kantonalverband::VerantwortungProgramm",
+            "role_class": "Group::Kantonalverband::VerantwortungProgramm",
+            "role_name": "Verantwortliche*r Programm",
+            "permissions": [
+                "group_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 426,
+            "group_name": "Pfadi Kanton Schwyz",
+            "role": "Group::Kantonalverband::Adressverwaltung",
+            "role_class": "Group::Kantonalverband::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_and_below_full"
+            ]
+        },
+        {
+            "group_id": 427,
+            "group_name": "Pfadi Uri",
+            "role": "Group::Kantonalverband::Adressverwaltung",
+            "role_class": "Group::Kantonalverband::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_and_below_full"
+            ]
+        },
+        {
+            "group_id": 427,
+            "group_name": "Pfadi Uri",
+            "role": "Group::Kantonalverband::VerantwortungAusbildung",
+            "role_class": "Group::Kantonalverband::VerantwortungAusbildung",
+            "role_name": "Verantwortliche*r Ausbildung",
+            "permissions": [
+                "layer_full",
+                "layer_and_below_read",
+                "contact_data",
+                "approve_applications"
+            ]
+        },
+        {
+            "group_id": 428,
+            "group_name": "Pfadi Kanton Solothurn",
+            "role": "Group::Kantonalverband::VerantwortungKrisenteam",
+            "role_class": "Group::Kantonalverband::VerantwortungKrisenteam",
+            "role_name": "Verantwortliche*r Krisenteam",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data",
+                "crisis_trigger"
+            ]
+        },
+        {
+            "group_id": 428,
+            "group_name": "Pfadi Kanton Solothurn",
+            "role": "Group::Kantonalverband::Adressverwaltung",
+            "role_class": "Group::Kantonalverband::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_and_below_full"
+            ]
+        },
+        {
+            "group_id": 429,
+            "group_name": "Pfadi Region Basel",
+            "role": "Group::Kantonalverband::Sekretariat",
+            "role_class": "Group::Kantonalverband::Sekretariat",
+            "role_name": "Sekretariat",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 429,
+            "group_name": "Pfadi Region Basel",
+            "role": "Group::Kantonalverband::Mitarbeiter",
+            "role_class": "Group::Kantonalverband::Mitarbeiter",
+            "role_name": "Mitarbeiter",
+            "permissions": [
+                "group_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 464,
+            "group_name": "Scout Pugerna",
+            "role": "Group::Abteilung::VizePraesidium",
+            "role_class": "Group::Abteilung::VizePraesidium",
+            "role_name": "Vize Präsident*in",
+            "permissions": [
+                "group_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 464,
+            "group_name": "Scout Pugerna",
+            "role": "Group::Abteilung::Adressverwaltung",
+            "role_class": "Group::Abteilung::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 467,
+            "group_name": "Muta Lupetti",
+            "role": "Group::Woelfe::Einheitsleitung",
+            "role_class": "Group::Woelfe::Einheitsleitung",
+            "role_name": "Einheitsleiter*in",
+            "permissions": [
+                "layer_and_below_read"
+            ]
+        },
+        {
+            "group_id": 505,
+            "group_name": "Obere Emme",
+            "role": "Group::Region::Regionalleitung",
+            "role_class": "Group::Region::Regionalleitung",
+            "role_name": "Regionsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 505,
+            "group_name": "Obere Emme",
+            "role": "Group::Region::Sekretariat",
+            "role_class": "Group::Region::Sekretariat",
+            "role_name": "Sekretariat",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 506,
+            "group_name": "Chutze Pfadi",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 511,
+            "group_name": "Cours B",
+            "role": "Group::Abteilung::Coach",
+            "role_class": "Group::Abteilung::Coach",
+            "role_name": "Coach",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 511,
+            "group_name": "Cours B",
+            "role": "Group::Abteilung::Adressverwaltung",
+            "role_class": "Group::Abteilung::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 513,
+            "group_name": "Rotzgoofe",
+            "role": "Group::Woelfe::Mitleitung",
+            "role_class": "Group::Woelfe::Mitleitung",
+            "role_name": "Mitleiter*in",
+            "permissions": [
+                "layer_and_below_read"
+            ]
+        },
+        {
+            "group_id": 522,
+            "group_name": "Pfadi Lampenberg Basel",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 536,
+            "group_name": "Test ABC",
+            "role": "Group::Kantonalverband::Kassier",
+            "role_class": "Group::Kantonalverband::Kassier",
+            "role_name": "Kassier*in",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 538,
+            "group_name": "TestAT",
+            "role": "Group::Abteilung::Adressverwaltung",
+            "role_class": "Group::Abteilung::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 548,
+            "group_name": "Meute B1",
+            "role": "Group::Woelfe::Adressverwaltung",
+            "role_class": "Group::Woelfe::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "group_and_below_full"
+            ]
+        },
+        {
+            "group_id": 588,
+            "group_name": "Wolf",
+            "role": "Group::Woelfe::Adressverwaltung",
+            "role_class": "Group::Woelfe::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "group_and_below_full"
+            ]
+        },
+        {
+            "group_id": 600,
+            "group_name": "Geschäftsstelle",
+            "role": "Group::BundesKommission::Leitung",
+            "role_class": "Group::BundesKommission::Leitung",
+            "role_name": "Leiter*in",
+            "permissions": [
+                "layer_read",
+                "group_and_below_full"
+            ]
+        },
+        {
+            "group_id": 613,
+            "group_name": "Biber",
+            "role": "Group::Biber::Adressverwaltung",
+            "role_class": "Group::Biber::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "group_and_below_full"
+            ]
+        },
+        {
+            "group_id": 648,
+            "group_name": "Rinau",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 650,
+            "group_name": "Wildert",
+            "role": "Group::Abteilung::Kassier",
+            "role_class": "Group::Abteilung::Kassier",
+            "role_name": "Kassier*in",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 657,
+            "group_name": "Corps Seetal ",
+            "role": "Group::Region::Regionalleitung",
+            "role_class": "Group::Region::Regionalleitung",
+            "role_name": "Regionsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 658,
+            "group_name": "Eibu ",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 660,
+            "group_name": "Pfadi Kanton Bern TEST 2020",
+            "role": "Group::Kantonalverband::Kantonsleitung",
+            "role_class": "Group::Kantonalverband::Kantonsleitung",
+            "role_name": "Kantonsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications"
+            ]
+        },
+        {
+            "group_id": 660,
+            "group_name": "Pfadi Kanton Bern TEST 2020",
+            "role": "Group::Kantonalverband::VerantwortungAusbildung",
+            "role_class": "Group::Kantonalverband::VerantwortungAusbildung",
+            "role_name": "Verantwortliche*r Ausbildung",
+            "permissions": [
+                "layer_full",
+                "layer_and_below_read",
+                "contact_data",
+                "approve_applications"
+            ]
+        },
+        {
+            "group_id": 702,
+            "group_name": "Pfadi Züri Oberland",
+            "role": "Group::Region::Regionalleitung",
+            "role_class": "Group::Region::Regionalleitung",
+            "role_name": "Regionsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 732,
+            "group_name": "Groupe Sardine",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 738,
+            "group_name": "Sezione Sardina",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 797,
+            "group_name": "Pfadieinheit Güt",
+            "role": "Group::Pfadi::Einheitsleitung",
+            "role_class": "Group::Pfadi::Einheitsleitung",
+            "role_name": "Einheitsleiter*in",
+            "permissions": [
+                "layer_and_below_read"
+            ]
+        },
+        {
+            "group_id": 797,
+            "group_name": "Pfadieinheit Güt",
+            "role": "Group::Pfadi::Adressverwaltung",
+            "role_class": "Group::Pfadi::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "group_and_below_full"
+            ]
+        },
+        {
+            "group_id": 808,
+            "group_name": "Abteilung Veloschluuch",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 808,
+            "group_name": "Abteilung Veloschluuch",
+            "role": "Group::Abteilung::Webmaster",
+            "role_class": "Group::Abteilung::Webmaster",
+            "role_name": "Webmaster",
+            "permissions": [
+                "group_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 815,
+            "group_name": "Patria",
+            "role": "Group::Abteilung::Adressverwaltung",
+            "role_class": "Group::Abteilung::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 828,
+            "group_name": "CoFo BE 2021 - Rpz le ghetto",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 837,
+            "group_name": "CoFoBL 2024",
+            "role": "Group::Abteilung::Sekretariat",
+            "role_class": "Group::Abteilung::Sekretariat",
+            "role_name": "Sekretariat",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 859,
+            "group_name": "Wolfsmeute",
+            "role": "Group::Woelfe::Adressverwaltung",
+            "role_class": "Group::Woelfe::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "group_and_below_full"
+            ]
+        },
+        {
+            "group_id": 877,
+            "group_name": "testregion",
+            "role": "Group::Region::Regionalleitung",
+            "role_class": "Group::Region::Regionalleitung",
+            "role_name": "Regionsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 894,
+            "group_name": "PTA Bern",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 907,
+            "group_name": "Bonivard",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 910,
+            "group_name": "CofoBL",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 952,
+            "group_name": "Pfadi Wulp",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 956,
+            "group_name": "Troupe",
+            "role": "Group::Pfadi::Adressverwaltung",
+            "role_class": "Group::Pfadi::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "group_and_below_full"
+            ]
+        },
+        {
+            "group_id": 956,
+            "group_name": "Troupe",
+            "role": "Group::Pfadi::Einheitsleitung",
+            "role_class": "Group::Pfadi::Einheitsleitung",
+            "role_name": "Einheitsleiter*in",
+            "permissions": [
+                "layer_and_below_read"
+            ]
+        },
+        {
+            "group_id": 971,
+            "group_name": "Cours coachs romand 2022",
+            "role": "Group::Kantonalverband::VerantwortungAusbildung",
+            "role_class": "Group::Kantonalverband::VerantwortungAusbildung",
+            "role_name": "Verantwortliche*r Ausbildung",
+            "permissions": [
+                "layer_full",
+                "layer_and_below_read",
+                "contact_data",
+                "approve_applications"
+            ]
+        },
+        {
+            "group_id": 971,
+            "group_name": "Cours coachs romand 2022",
+            "role": "Group::Kantonalverband::Kantonsleitung",
+            "role_class": "Group::Kantonalverband::Kantonsleitung",
+            "role_name": "Kantonsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications"
+            ]
+        },
+        {
+            "group_id": 971,
+            "group_name": "Cours coachs romand 2022",
+            "role": "Group::Kantonalverband::PowerUser",
+            "role_class": "Group::Kantonalverband::PowerUser",
+            "role_name": "PowerUser",
+            "permissions": [
+                "layer_and_below_full"
+            ]
+        },
+        {
+            "group_id": 972,
+            "group_name": "La petite ourse",
+            "role": "Group::Abteilung::PowerUser",
+            "role_class": "Group::Abteilung::PowerUser",
+            "role_name": "PowerUser",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 975,
+            "group_name": "Pilote",
+            "role": "Group::Kantonalverband::VerantwortungAusbildung",
+            "role_class": "Group::Kantonalverband::VerantwortungAusbildung",
+            "role_name": "Verantwortliche*r Ausbildung",
+            "permissions": [
+                "layer_full",
+                "layer_and_below_read",
+                "contact_data",
+                "approve_applications"
+            ]
+        },
+        {
+            "group_id": 977,
+            "group_name": "Groupe de test",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 989,
+            "group_name": "Groupe St-Pancras",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 989,
+            "group_name": "Groupe St-Pancras",
+            "role": "Group::Abteilung::PowerUser",
+            "role_class": "Group::Abteilung::PowerUser",
+            "role_name": "PowerUser",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 999,
+            "group_name": "Groupe St-Balthazar",
+            "role": "Group::Abteilung::PowerUser",
+            "role_class": "Group::Abteilung::PowerUser",
+            "role_name": "PowerUser",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 1010,
+            "group_name": "Groupe St-Albert",
+            "role": "Group::Abteilung::PowerUser",
+            "role_class": "Group::Abteilung::PowerUser",
+            "role_name": "PowerUser",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 1020,
+            "group_name": "Groupe St-Charles",
+            "role": "Group::Abteilung::PowerUser",
+            "role_class": "Group::Abteilung::PowerUser",
+            "role_name": "PowerUser",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 1025,
+            "group_name": "Groupe St-Dominique",
+            "role": "Group::Abteilung::PowerUser",
+            "role_class": "Group::Abteilung::PowerUser",
+            "role_name": "PowerUser",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 1030,
+            "group_name": "Groupe St-Eusèbe",
+            "role": "Group::Abteilung::PowerUser",
+            "role_class": "Group::Abteilung::PowerUser",
+            "role_name": "PowerUser",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 1034,
+            "group_name": "Groupe St-François",
+            "role": "Group::Abteilung::PowerUser",
+            "role_class": "Group::Abteilung::PowerUser",
+            "role_name": "PowerUser",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 1055,
+            "group_name": "PBS IT-Services",
+            "role": "Group::BundesGremium::Leitung",
+            "role_class": "Group::BundesGremium::Leitung",
+            "role_name": "Leiter*in",
+            "permissions": [
+                "group_and_below_full"
+            ]
+        },
+        {
+            "group_id": 1092,
+            "group_name": "Bubenberg",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1114,
+            "group_name": "Silverscouts",
+            "role": "Group::Silverscouts::Verantwortung",
+            "role_class": "Group::Silverscouts::Verantwortung",
+            "role_name": "Verantwortliche*r",
+            "permissions": [
+                "layer_and_below_full",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1506,
+            "group_name": "Aargau / Solothurn",
+            "role": "Group::SilverscoutsRegion::Leitung",
+            "role_class": "Group::SilverscoutsRegion::Leitung",
+            "role_name": "Leitung",
+            "permissions": [
+                "group_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 1538,
+            "group_name": "Test Abteilung",
+            "role": "Group::Abteilung::Sekretariat",
+            "role_class": "Group::Abteilung::Sekretariat",
+            "role_name": "Sekretariat",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1563,
+            "group_name": "PBS CH RI 253-21 Test ",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1585,
+            "group_name": "Test BuLa",
+            "role": "Group::Kantonalverband::Praesidium",
+            "role_class": "Group::Kantonalverband::Praesidium",
+            "role_name": "Präsident*in",
+            "permissions": [
+                "group_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 1595,
+            "group_name": "PBS CH ZH 235-25 Aufbaukurs Wolfs- / Pfadistufe (PZO)",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1609,
+            "group_name": "Groupe Blabla",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1611,
+            "group_name": "Limmat / Glattal",
+            "role": "Group::Region::Regionalleitung",
+            "role_class": "Group::Region::Regionalleitung",
+            "role_name": "Regionsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1611,
+            "group_name": "Limmat / Glattal",
+            "role": "Group::Region::Sekretariat",
+            "role_class": "Group::Region::Sekretariat",
+            "role_name": "Sekretariat",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1611,
+            "group_name": "Limmat / Glattal",
+            "role": "Group::Re2026-01-28T17:02:53.452346414Z gion::Kassier",
+            "role_class": "Group::Region::Kassier",
+            "role_name": "Kassier*in",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 1641,
+            "group_name": "Schneckenberg",
+            "role": "Group::Abteilung::PraesidiumApv",
+            "role_class": "Group::Abteilung::PraesidiumApv",
+            "role_name": "Präsident*in APV",
+            "permissions": [
+                "group_read"
+            ]
+        },
+        {
+            "group_id": 1641,
+            "group_name": "Schneckenberg",
+            "role": "Group::Abteilung::Kassier",
+            "role_class": "Group::Abteilung::Kassier",
+            "role_name": "Kassier*in",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 1641,
+            "group_name": "Schneckenberg",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1641,
+            "group_name": "Schneckenberg",
+            "role": "Group::Abteilung::StufenleitungPfadi",
+            "role_class": "Group::Abteilung::StufenleitungPfadi",
+            "role_name": "Stufenleiter*in Pfadi",
+            "permissions": [
+                "layer_and_below_read"
+            ]
+        },
+        {
+            "group_id": 1641,
+            "group_name": "Schneckenberg",
+            "role": "Group::Abteilung::Praesidium",
+            "role_class": "Group::Abteilung::Praesidium",
+            "role_name": "Präsident*in",
+            "permissions": [
+                "group_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 1641,
+            "group_name": "Schneckenberg",
+            "role": "Group::Abteilung::Coach",
+            "role_class": "Group::Abteilung::Coach",
+            "role_name": "Coach",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 1641,
+            "group_name": "Schneckenberg",
+            "role": "Group::Abteilung::Beisitz",
+            "role_class": "Group::Abteilung::Beisitz",
+            "role_name": "Beisitzer*in",
+            "permissions": [
+                "group_read"
+            ]
+        },
+        {
+            "group_id": 1641,
+            "group_name": "Schneckenberg",
+            "role": "Group::Abteilung::Webmaster",
+            "role_class": "Group::Abteilung::Webmaster",
+            "role_name": "Webmaster",
+            "permissions": [
+                "group_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 1641,
+            "group_name": "Schneckenberg",
+            "role": "Group::Abteilung::Revisor",
+            "role_class": "Group::Abteilung::Revisor",
+            "role_name": "Revisor*in",
+            "permissions": [
+                "group_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 1641,
+            "group_name": "Schneckenberg",
+            "role": "Group::Abteilung::VizePraesidium",
+            "role_class": "Group::Abteilung::VizePraesidium",
+            "role_name": "Vize Präsident*in",
+            "permissions": [
+                "group_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 1641,
+            "group_name": "Schneckenberg",
+            "role": "Group::Abteilung::Materialwart",
+            "role_class": "Group::Abteilung::Materialwart",
+            "role_name": "Materialwart*in",
+            "permissions": [
+                "group_read"
+            ]
+        },
+        {
+            "group_id": 1642,
+            "group_name": "Wölflistamm Kobra",
+            "role": "Group::Woelfe::Mitleitung",
+            "role_class": "Group::Woelfe::Mitleitung",
+            "role_name": "Mitleiter*in",
+            "permissions": [
+                "layer_and_below_read"
+            ]
+        },
+        {
+            "group_id": 1643,
+            "group_name": "Pfadistamm Pechburg",
+            "role": "Group::Pfadi::Einheitsleitung",
+            "role_class": "Group::Pfadi::Einheitsleitung",
+            "role_name": "Einheitsleiter*in",
+            "permissions": [
+                "layer_and_below_read"
+            ]
+        },
+        {
+            "group_id": 1644,
+            "group_name": "Piostufe Kappe",
+            "role": "Group::Pio::Adressverwaltung",
+            "role_class": "Group::Pio::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "group_and_below_full"
+            ]
+        },
+        {
+            "group_id": 1645,
+            "group_name": "APV",
+            "role": "Group::Ehemalige::Mitglied",
+            "role_class": "Group::Ehemalige::Mitglied",
+            "role_name": "Mitglied",
+            "permissions": []
+        },
+        {
+            "group_id": 1645,
+            "group_name": "APV",
+            "role": "Group::Ehemalige::Leitung",
+            "role_class": "Group::Ehemalige::Leitung",
+            "role_name": "Leitung",
+            "permissions": [
+                "group_full"
+            ]
+        },
+        {
+            "group_id": 1700,
+            "group_name": "Pfadi Hinterberg-Wyfelde",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1701,
+            "group_name": "Pfadi Baar",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1734,
+            "group_name": "Testregion",
+            "role": "Group::Region::Regionalleitung",
+            "role_class": "Group::Region::Regionalleitung",
+            "role_name": "Regionsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1738,
+            "group_name": "PBS CH RI 253-25",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        }
+    ]
+}
