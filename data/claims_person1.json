@@ -1,0 +1,754 @@
+{
+    "sub": "588",
+    "email": "letizia_wilhelm@hitobito.example.com",
+    "first_name": "Letizia",
+    "last_name": "Wilhelm",
+    "nickname": "Norde",
+    "address": "Tor zum Norden 13",
+    "address_care_of": null,
+    "street": "Tor zum Norden",
+    "housenumber": "13",
+    "postbox": null,
+    "zip_code": "9494",
+    "town": "Schaan",
+    "country": "LI",
+    "company_name": null,
+    "company": false,
+    "gender": "w",
+    "birthday": "2002-09-26",
+    "language": "de",
+    "primary_group_id": 51,
+    "pronouns": null,
+    "title": null,
+    "salutation": "lieber_titel_nachname",
+    "prefers_digital_correspondence": false,
+    "kantonalverband_id": 49,
+    "roles": [
+        {
+            "group_id": 51,
+            "group_name": "Pfadi Zytturm",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 69,
+            "group_name": "Dracheburg",
+            "role": "Group::Abteilung::VerantwortungMaterialverkaufsstelle",
+            "role_class": "Group::Abteilung::VerantwortungMaterialverkaufsstelle",
+            "role_name": "Verantwortliche*r Materialverkaufsstelle",
+            "permissions": [
+                "group_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 69,
+            "group_name": "Dracheburg",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 69,
+            "group_name": "Dracheburg",
+            "role": "Group::Abteilung::PowerUser",
+            "role_class": "Group::Abteilung::PowerUser",
+            "role_name": "PowerUser",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 144,
+            "group_name": "Katholischer Pfadfinder Korps",
+            "role": "Group::Region::Regionalleitung",
+            "role_class": "Group::Region::Regionalleitung",
+            "role_name": "Regionsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 166,
+            "group_name": "Pfadi Unterwalden",
+            "role": "Group::Kantonalverband::Adressverwaltung",
+            "role_class": "Group::Kantonalverband::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_and_below_full"
+            ]
+        },
+        {
+            "group_id": 243,
+            "group_name": "St. Mauritius",
+            "role": "Group::Abteilung::Sekretariat",
+            "role_class": "Group::Abteilung::Sekretariat",
+            "role_name": "Sekretariat",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 501,
+            "group_name": "Pfadi Beispiel",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 501,
+            "group_name": "Pfadi Beispiel",
+            "role": "Group::Abteilung::Rechnungen",
+            "role_class": "Group::Abteilung::Rechnungen",
+            "role_name": "Rechnungen",
+            "permissions": [
+                "layer_and_below_read",
+                "finance",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 511,
+            "group_name": "Cours B",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 530,
+            "group_name": "Beispielabteilung 1",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 648,
+            "group_name": "Rinau",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 732,
+            "group_name": "Groupe Sardine",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 732,
+            "group_name": "Groupe Sardine",
+            "role": "Group::Abteilung::Adressverwaltung",
+            "role_class": "Group::Abteilung::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 774,
+            "group_name": "Pfadi Lampenberg",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 774,
+            "group_name": "Pfadi Lampenberg",
+            "role": "Group::Abteilung::PowerUser",
+            "role_class": "Group::Abteilung::PowerUser",
+            "role_name": "PowerUser",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 774,
+            "group_name": "Pfadi Lampenberg",
+            "role": "Group::Abteilung::AbteilungsleitungStv",
+            "role_class": "Group::Abteilung::AbteilungsleitungStv",
+            "role_name": "Abteilungsleiter*in Stv",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 787,
+            "group_name": "Stärnli",
+            "role": "Group::Biber::Biber",
+            "role_class": "Group::Biber::Biber",
+            "role_name": "Biber",
+            "permissions": []
+        },
+        {
+            "group_id": 792,
+            "group_name": "CoFoBL 2020",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 809,
+            "group_name": "Biberstufe",
+            "role": "Group::Biber::Biber",
+            "role_class": "Group::Biber::Biber",
+            "role_name": "Biber",
+            "permissions": []
+        },
+        {
+            "group_id": 822,
+            "group_name": "Pfadistufe",
+            "role": "Group::Pfadi::Pfadi",
+            "role_class": "Group::Pfadi::Pfadi",
+            "role_name": "Pfadi",
+            "permissions": []
+        },
+        {
+            "group_id": 837,
+            "group_name": "CoFoBL 2024",
+            "role": "Group::Abteilung::Adressverwaltung",
+            "role_class": "Group::Abteilung::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 837,
+            "group_name": "CoFoBL 2024",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 837,
+            "group_name": "CoFoBL 2024",
+            "role": "Group::Abteilung::Rechnungen",
+            "role_class": "Group::Abteilung::Rechnungen",
+            "role_name": "Rechnungen",
+            "permissions": [
+                "layer_and_below_read",
+                "finance",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 868,
+            "group_name": "Pfadi Aufbau",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 868,
+            "group_name": "Pfadi Aufbau",
+            "role": "Group::Abteilung::Rechnungen",
+            "role_class": "Group::Abteilung::Rechnungen",
+            "role_name": "Rechnungen",
+            "permissions": [
+                "layer_and_below_read",
+                "finance",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 907,
+            "group_name": "Bonivard",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 907,
+            "group_name": "Bonivard",
+            "role": "Group::Abteilung::Coach",
+            "role_class": "Group::Abteilung::Coach",
+            "role_name": "Coach",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 908,
+            "group_name": "Terre Neuve",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 908,
+            "group_name": "Terre Neuve",
+            "role": "Group::Abteilung::Coach",
+            "role_class": "Group::Abteilung::Coach",
+            "role_name": "Coach",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 909,
+            "group_name": "Choiseul",
+            "role": "Group::Abteilung::Coach",
+            "role_class": "Group::Abteilung::Coach",
+            "role_name": "Coach",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 909,
+            "group_name": "Choiseul",
+            "role": "Group::Abteilung::Sekretariat",
+            "role_class": "Group::Abteilung::Sekretariat",
+            "role_name": "Sekretariat",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 909,
+            "group_name": "Choiseul",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 909,
+            "group_name": "Choiseul",
+            "role": "Group::Abteilung::Rechnungen",
+            "role_class": "Group::Abteilung::Rechnungen",
+            "role_name": "Rechnungen",
+            "permissions": [
+                "layer_and_below_read",
+                "finance",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 910,
+            "group_name": "CofoBL",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 910,
+            "group_name": "CofoBL",
+            "role": "Group::Abteilung::Coach",
+            "role_class": "Group::Abteilung::Coach",
+            "role_name": "Coach",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 910,
+            "group_name": "CofoBL",
+            "role": "Group::Abteilung::Adressverwaltung",
+            "role_class": "Group::Abteilung::Adressverwaltung",
+            "role_name": "Adressverwalter*in",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 911,
+            "group_name": "Rhône-Jura",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 911,
+            "group_name": "Rhône-Jura",
+            "role": "Group::Abteilung::Coach",
+            "role_class": "Group::Abteilung::Coach",
+            "role_name": "Coach",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 912,
+            "group_name": "Jean-Jacques Rousseau",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 912,
+            "group_name": "Jean-Jacques Rousseau",
+            "role": "Group::Abteilung::Coach",
+            "role_class": "Group::Abteilung::Coach",
+            "role_name": "Coach",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 913,
+            "group_name": "Grande Ourse",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 913,
+            "group_name": "Grande Ourse",
+            "role": "Group::Abteilung::Coach",
+            "role_class": "Group::Abteilung::Coach",
+            "role_name": "Coach",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 914,
+            "group_name": "St-Michel",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 914,
+            "group_name": "St-Michel",
+            "role": "Group::Abteilung::Coach",
+            "role_class": "Group::Abteilung::Coach",
+            "role_name": "Coach",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 915,
+            "group_name": "Henry Dunant",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 915,
+            "group_name": "Henry Dunant",
+            "role": "Group::Abteilung::Coach",
+            "role_class": "Group::Abteilung::Coach",
+            "role_name": "Coach",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 916,
+            "group_name": "Chêne",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 916,
+            "group_name": "Chêne",
+            "role": "Group::Abteilung::Coach",
+            "role_class": "Group::Abteilung::Coach",
+            "role_name": "Coach",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 981,
+            "group_name": "Musterabteilung",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1042,
+            "group_name": "Nouveau Monde",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1045,
+            "group_name": "Benoît de Pontverre",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1048,
+            "group_name": "Perceval",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1052,
+            "group_name": "Scoutisme Aventure Troinex",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1099,
+            "group_name": "Cours RG",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1700,
+            "group_name": "Pfadi Hinterberg-Wyfelde",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1700,
+            "group_name": "Pfadi Hinterberg-Wyfelde",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1700,
+            "group_name": "Pfadi Hinterberg-Wyfelde",
+            "role": "Group::Abteilung::Sekretariat",
+            "role_class": "Group::Abteilung::Sekretariat",
+            "role_name": "Sekretariat",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "manual_deletion"
+            ]
+        },
+        {
+            "group_id": 1700,
+            "group_name": "Pfadi Hinterberg-Wyfelde",
+            "role": "Group::Abteilung::PowerUser",
+            "role_class": "Group::Abteilung::PowerUser",
+            "role_name": "PowerUser",
+            "permissions": [
+                "layer_full"
+            ]
+        },
+        {
+            "group_id": 1700,
+            "group_name": "Pfadi Hinterberg-Wyfelde",
+            "role": "Group::Abteilung::Coach",
+            "role_class": "Group::Abteilung::Coach",
+            "role_name": "Coach",
+            "permissions": [
+                "layer_and_below_read",
+                "contact_data"
+            ]
+        },
+        {
+            "group_id": 1760,
+            "group_name": "Pfadi Supercool",
+            "role": "Group::Abteilung::Abteilungsleitung",
+            "role_class": "Group::Abteilung::Abteilungsleitung",
+            "role_name": "Abteilungsleiter*in",
+            "permissions": [
+                "layer_and_below_full",
+                "contact_data",
+                "approve_applications",
+                "manual_deletion"
+            ]
+        }
+    ]
+}
