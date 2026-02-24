@@ -3,6 +3,8 @@ package ch.pfadiaargau.keycloak.authentication.authenticators.browser;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
+import org.keycloak.authentication.authenticators.broker.util.SerializedBrokeredIdentityContext;
+import org.keycloak.broker.provider.BrokeredIdentityContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -18,19 +20,32 @@ public class MidataSyncAuthenticator implements Authenticator {
         logger.info("MidataSync: authenticate() called.");
 
         // 1. Check if we have a session and user
-        if (context.getAuthenticationSession() == null || context.getUser() == null) {
+        // if (context.getAuthenticationSession() == null || context.getUser() == null) {
+        if (context.getAuthenticationSession() == null) {
             logger.debug("MidataSync: No user or session yet. Skipping.");
             context.attempted();
             return;
         }
 
-        var brokerAlias = context.getAuthenticationSession().getUserSessionNotes().get("kc.identity.provider");
-        logger.info("MidataSync: Broker Alias: " + brokerAlias);
+        logger.info("MidataSync: User " + context.getUser().getUsername() + " is authenticating.");
+
+
+        SerializedBrokeredIdentityContext serializedBrokeredIdentityContext = new SerializedBrokeredIdentityContext();
+        BrokeredIdentityContext idpContext = serializedBrokeredIdentityContext.deserialize(context.getSession(), context.getAuthenticationSession());
+
+        logger.info("MidataSync: IdP Context: " + idpContext);
+        logger.info("MidataSync: User Roles: " + idpContext.getAttributes().get("relationships.roles"));
+        logger.info("MidataSync: User Roles: " + idpContext.getAttributes().get("data.relationships.roles"));
+
+        // var brokerAlias = idpContext.getIdpConfig().getAlias();
+        // logger.info("MidataSync: Broker Alias: " + brokerAlias);
 
         // // 2. Safely get the token
-        // String rawToken = context.getAuthenticationSession().getAuthNote("BROKER_ID_TOKEN");
+        // String rawToken =
+        // context.getAuthenticationSession().getAuthNote("BROKER_ID_TOKEN");
         // if (rawToken == null) {
-        //     rawToken = context.getAuthenticationSession().getAuthNote("BROKER_ACCESS_TOKEN");
+        // rawToken =
+        // context.getAuthenticationSession().getAuthNote("BROKER_ACCESS_TOKEN");
         // }
 
         // 3. If no token, just succeed and let the user finish login

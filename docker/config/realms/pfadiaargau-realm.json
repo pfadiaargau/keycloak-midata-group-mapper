@@ -1272,7 +1272,7 @@
   "adminEventsEnabled" : false,
   "adminEventsDetailsEnabled" : false,
   "identityProviders" : [ {
-    "alias" : "oidc",
+    "alias" : "midata-test",
     "displayName" : "MiData Test",
     "internalId" : "f0f55e48-43f2-4b92-9f25-9d8612d04edf",
     "providerId" : "oidc",
@@ -1322,7 +1322,7 @@
   "identityProviderMappers" : [ {
     "id" : "9fd9363d-cd3b-445d-93af-42c6aed81818",
     "name" : "firstName",
-    "identityProviderAlias" : "oidc",
+    "identityProviderAlias" : "midata-test",
     "identityProviderMapper" : "oidc-user-attribute-idp-mapper",
     "config" : {
       "syncMode" : "INHERIT",
@@ -1332,7 +1332,7 @@
   }, {
     "id" : "73f5cb92-7aa5-4151-8b03-dce1a5f026fd",
     "name" : "lastName",
-    "identityProviderAlias" : "oidc",
+    "identityProviderAlias" : "midata-test",
     "identityProviderMapper" : "oidc-user-attribute-idp-mapper",
     "config" : {
       "syncMode" : "INHERIT",
@@ -1342,7 +1342,7 @@
   }, {
     "id" : "23581b9d-8b30-482c-992a-3b55cee03f14",
     "name" : "email",
-    "identityProviderAlias" : "oidc",
+    "identityProviderAlias" : "midata-test",
     "identityProviderMapper" : "oidc-user-attribute-idp-mapper",
     "config" : {
       "syncMode" : "INHERIT",
@@ -1352,7 +1352,7 @@
   }, {
     "id" : "a7e6e067-981e-4f92-9107-77917b159695",
     "name" : "country",
-    "identityProviderAlias" : "oidc",
+    "identityProviderAlias" : "midata-test",
     "identityProviderMapper" : "oidc-user-attribute-idp-mapper",
     "config" : {
       "syncMode" : "INHERIT",
@@ -1362,7 +1362,7 @@
   }, {
     "id" : "764cf3b6-36c9-4f86-8b27-ea04b2ef8bb8",
     "name" : "address",
-    "identityProviderAlias" : "oidc",
+    "identityProviderAlias" : "midata-test",
     "identityProviderMapper" : "oidc-user-attribute-idp-mapper",
     "config" : {
       "syncMode" : "INHERIT",
@@ -1372,7 +1372,7 @@
   }, {
     "id" : "4d4262da-8f4b-4827-8fd3-a15cf716c2cc",
     "name" : "town",
-    "identityProviderAlias" : "oidc",
+    "identityProviderAlias" : "midata-test",
     "identityProviderMapper" : "oidc-user-attribute-idp-mapper",
     "config" : {
       "syncMode" : "INHERIT",
@@ -1382,7 +1382,7 @@
   }, {
     "id" : "1df7682c-90e4-4a1b-8058-12fbb179be9b",
     "name" : "pbsId",
-    "identityProviderAlias" : "oidc",
+    "identityProviderAlias" : "midata-test",
     "identityProviderMapper" : "oidc-user-attribute-idp-mapper",
     "config" : {
       "syncMode" : "INHERIT",
@@ -1392,7 +1392,7 @@
   }, {
     "id" : "3faca15c-f655-4229-8de4-e51b5a015b57",
     "name" : "zipCode",
-    "identityProviderAlias" : "oidc",
+    "identityProviderAlias" : "midata-test",
     "identityProviderMapper" : "oidc-user-attribute-idp-mapper",
     "config" : {
       "syncMode" : "INHERIT",
@@ -1402,7 +1402,7 @@
   }, {
     "id" : "5ec0fd92-eaff-4d8b-a2f9-7394e83dd620",
     "name" : "nickname",
-    "identityProviderAlias" : "oidc",
+    "identityProviderAlias" : "midata-test",
     "identityProviderMapper" : "oidc-user-attribute-idp-mapper",
     "config" : {
       "syncMode" : "INHERIT",
@@ -1412,7 +1412,7 @@
   }, {
     "id" : "a666bb15-731e-4e2d-9b45-eb03af80bbb1",
     "name" : "pbs_id",
-    "identityProviderAlias" : "oidc",
+    "identityProviderAlias" : "midata-test",
     "identityProviderMapper" : "oidc-username-idp-mapper",
     "config" : {
       "syncMode" : "INHERIT",
