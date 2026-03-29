@@ -1,22 +1,19 @@
 package ch.pfadiaargau.keycloak.identityprovider.mapper;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.keycloak.broker.oidc.KeycloakOIDCIdentityProviderFactory;
 import org.keycloak.broker.oidc.OIDCIdentityProvider;
-import org.keycloak.broker.oidc.OIDCIdentityProviderConfig;
 import org.keycloak.broker.oidc.OIDCIdentityProviderFactory;
 import org.keycloak.broker.provider.AbstractIdentityProviderMapper;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
@@ -31,40 +28,57 @@ import org.keycloak.provider.ProviderConfigProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ch.pfadiaargau.model.MidataRole;
+
 public class MidataGroupMapper extends AbstractIdentityProviderMapper {
 
     public static final String PROVIDER_ID = "midata-group-mapper";
+
+    private static final Logger LOGGER = Logger.getLogger(MidataGroupMapper.class.getName());
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     private static final Set<IdentityProviderSyncMode> IDENTITY_PROVIDER_SYNC_MODES = new HashSet<>(
             Arrays.asList(IdentityProviderSyncMode.values()));
-    public static final String[] COMPATIBLE_PROVIDERS = { KeycloakOIDCIdentityProviderFactory.PROVIDER_ID,
-            OIDCIdentityProviderFactory.PROVIDER_ID };
 
-    public static final Logger logger = Logger.getLogger(MidataGroupMapper.class.getName());
+    public static final String[] COMPATIBLE_PROVIDERS = {
+            KeycloakOIDCIdentityProviderFactory.PROVIDER_ID,
+            OIDCIdentityProviderFactory.PROVIDER_ID
+    };
 
-    // Config Keys
     public static final String CONF_BLACKLIST = "id_blacklist";
     public static final String CONF_GROUP_ROOT_PATH = "group_root_path";
+    public static final String CONF_ASSIGN_USER_TO_GROUP_NODE = "assign_user_to_group_node";
+    public static final String CONF_ASSIGN_USER_TO_ROLES_WITH_NO_ROLE_TYPE = "assign_user_to_roles_with_no_role_type";
 
     protected static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
 
     static {
-        // // Blacklist Field
-        // ProviderConfigProperty blacklist = new ProviderConfigProperty();
-        // blacklist.setName(CONF_BLACKLIST);
-        // blacklist.setLabel("ID Blacklist");
-        // blacklist.setHelpText("List with group IDs to exclude from assignment");
-        // blacklist.setType(ProviderConfigProperty.MULTIVALUED_STRING_TYPE);
-        // configProperties.add(blacklist);
-
-        // Group Root Field
         ProviderConfigProperty groupRoot = new ProviderConfigProperty();
         groupRoot.setName(CONF_GROUP_ROOT_PATH);
         groupRoot.setLabel("Group Root Path");
         groupRoot.setHelpText(
-                "Optional root group path under which to groups from the IdP are located. (Devided by '/' for subgroups, e.g., 'idp/midata')");
+                "Optional root group path under which groups from the IdP are located. " +
+                        "(Separated by '/' for subgroups, e.g. 'idp/midata')");
         groupRoot.setType(ProviderConfigProperty.STRING_TYPE);
         groupRoot.setRequired(true);
         configProperties.add(groupRoot);
+
+        ProviderConfigProperty assignUserToGroupNode = new ProviderConfigProperty();
+        assignUserToGroupNode.setName(CONF_ASSIGN_USER_TO_GROUP_NODE);
+        assignUserToGroupNode.setLabel("Assign User to Group Node");
+        assignUserToGroupNode.setHelpText("Whether to assign users to the exact group with the matching group_id");
+        assignUserToGroupNode.setType(ProviderConfigProperty.BOOLEAN_TYPE);
+        assignUserToGroupNode.setDefaultValue("true");
+        configProperties.add(assignUserToGroupNode);
+
+        ProviderConfigProperty assignUserToRolesWithNoRoleType = new ProviderConfigProperty();
+        assignUserToRolesWithNoRoleType.setName(CONF_ASSIGN_USER_TO_ROLES_WITH_NO_ROLE_TYPE);
+        assignUserToRolesWithNoRoleType.setLabel("Assign User to Roles with No matching role_type");
+        assignUserToRolesWithNoRoleType.setHelpText(
+                "Whether to assign users to groups for roles that do not have a matching role_type attribute");
+        assignUserToRolesWithNoRoleType.setType(ProviderConfigProperty.BOOLEAN_TYPE);
+        assignUserToRolesWithNoRoleType.setDefaultValue("false");
+        configProperties.add(assignUserToRolesWithNoRoleType);
     }
 
     @Override
@@ -81,6 +95,202 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
         processMapRules(realm, user, mapperModel, context);
     }
 
+    private void processMapRules(RealmModel realm, UserModel user,
+            IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
+
+        MapperConfig config = MapperConfig.from(mapperModel);
+
+        LOGGER.info("Midata-Group-Mapper: Starting group mapping with group root: " + config.groupRootPath
+                + " and blacklist: " + config.blacklist);
+
+        List<MidataRole> incomingRoles = extractIncomingRoles(context);
+        if (incomingRoles.isEmpty()) {
+            LOGGER.info("Midata-Group-Mapper: No incoming roles found");
+        }
+
+        Map<String, List<MidataRole>> rolesByGroupId = incomingRoles.stream()
+                .filter(role -> !config.blacklist.contains(role.getGroup_id()))
+                .collect(Collectors.groupingBy(
+                        MidataRole::getGroup_id,
+                        LinkedHashMap::new,
+                        Collectors.toList()));
+
+        List<GroupModel> existingMappedNodeGroups = getUserMappedNodeGroups(user, config);
+
+        syncExistingMemberships(user, existingMappedNodeGroups, rolesByGroupId, config);
+        joinMissingMemberships(realm, user, rolesByGroupId, config);
+    }
+
+    private List<MidataRole> extractIncomingRoles(BrokeredIdentityContext context) {
+        Object userInfo = context.getContextData().get(OIDCIdentityProvider.USER_INFO);
+        if (!(userInfo instanceof JsonNode jsonNode)) {
+            LOGGER.warning("Midata-Group-Mapper: USER_INFO is missing or not a JsonNode");
+            return List.of();
+        }
+
+        Map<String, Object> userInfoMap = OBJECT_MAPPER.convertValue(jsonNode, Map.class);
+        Object rolesObject = userInfoMap.get("roles");
+
+        if (!(rolesObject instanceof List<?> rolesList)) {
+            LOGGER.info("Midata-Group-Mapper: Expected 'roles' to be a List, but got: "
+                    + (rolesObject != null ? rolesObject.getClass().getName() : "null"));
+            return List.of();
+        }
+
+        return rolesList.stream()
+                .filter(Map.class::isInstance)
+                .map(Map.class::cast)
+                .filter(roleMap -> roleMap.containsKey("group_id") && roleMap.containsKey("role"))
+                .map(this::toMidataRole)
+                .collect(Collectors.toList());
+    }
+
+    @SuppressWarnings("unchecked")
+    private MidataRole toMidataRole(Map<?, ?> roleMap) {
+        return new MidataRole(
+                String.valueOf(roleMap.get("group_id")),
+                String.valueOf(roleMap.get("group_name")),
+                String.valueOf(roleMap.get("role")),
+                String.valueOf(roleMap.get("role_class")),
+                String.valueOf(roleMap.get("role_name")),
+                (List<String>) roleMap.get("permissions"));
+    }
+
+    private List<GroupModel> getUserMappedNodeGroups(UserModel user, MapperConfig config) {
+        return user.getGroupsStream()
+                .filter(isMappedNodeGroup(config))
+                .collect(Collectors.toList());
+    }
+
+    private Predicate<GroupModel> isMappedNodeGroup(MapperConfig config) {
+        return group -> hasAttribute(group, "group_id")
+                && hasAttribute(group, "group_type")
+                && "real".equals(group.getFirstAttribute("node_kind"))
+                && isUnderConfiguredRoot(group, config.groupRootPath);
+    }
+
+    private void syncExistingMemberships(UserModel user,
+            List<GroupModel> existingMappedNodeGroups,
+            Map<String, List<MidataRole>> rolesByGroupId,
+            MapperConfig config) {
+
+        for (GroupModel nodeGroup : existingMappedNodeGroups) {
+            String groupId = nodeGroup.getFirstAttribute("group_id");
+            List<MidataRole> desiredRolesForNode = rolesByGroupId.getOrDefault(groupId, List.of());
+
+            GroupModel rolesCategoryGroup = findRolesCategoryGroup(nodeGroup);
+            List<GroupModel> currentRoleGroups = findRoleGroups(rolesCategoryGroup)
+                    .collect(Collectors.toList());
+
+            boolean shouldHaveNodeMembership = config.assignUserToGroupNode && !desiredRolesForNode.isEmpty();
+
+            Set<String> desiredRoleValues = desiredRolesForNode.stream()
+                    .map(MidataRole::getRole)
+                    .collect(Collectors.toSet());
+
+            List<GroupModel> desiredRoleGroups = currentRoleGroups.stream()
+                    .filter(group -> desiredRoleValues.contains(group.getFirstAttribute("role_value")))
+                    .collect(Collectors.toList());
+
+            boolean shouldHaveRolesCategoryMembership = config.assignUserToRolesWithNoRoleType
+                    && !desiredRolesForNode.isEmpty()
+                    && desiredRoleGroups.isEmpty()
+                    && rolesCategoryGroup != null;
+
+            for (GroupModel currentRoleGroup : currentRoleGroups) {
+                boolean shouldKeep = desiredRoleGroups.stream()
+                        .anyMatch(desired -> desired.getId().equals(currentRoleGroup.getId()));
+                if (!shouldKeep) {
+                    user.leaveGroup(currentRoleGroup);
+                }
+            }
+
+            if (rolesCategoryGroup != null && !shouldHaveRolesCategoryMembership) {
+                user.leaveGroup(rolesCategoryGroup);
+            }
+
+            if (!shouldHaveNodeMembership) {
+                user.leaveGroup(nodeGroup);
+            }
+        }
+    }
+
+    private void joinMissingMemberships(RealmModel realm,
+            UserModel user,
+            Map<String, List<MidataRole>> rolesByGroupId,
+            MapperConfig config) {
+
+        for (Map.Entry<String, List<MidataRole>> entry : rolesByGroupId.entrySet()) {
+            String groupId = entry.getKey();
+            List<MidataRole> rolesForGroupId = entry.getValue();
+
+            GroupModel nodeGroup = findNodeGroupByGroupId(realm, groupId, config);
+            if (nodeGroup == null) {
+                LOGGER.fine("Midata-Group-Mapper: No matching node group found for group ID: " + groupId);
+                continue;
+            }
+
+            if (config.assignUserToGroupNode) {
+                user.joinGroup(nodeGroup);
+            }
+
+            GroupModel rolesCategoryGroup = findRolesCategoryGroup(nodeGroup);
+            if (rolesCategoryGroup == null) {
+                continue;
+            }
+
+            Set<String> desiredRoleValues = rolesForGroupId.stream()
+                    .map(MidataRole::getRole)
+                    .collect(Collectors.toSet());
+
+            List<GroupModel> matchingRoleGroups = findRoleGroups(rolesCategoryGroup)
+                    .filter(group -> desiredRoleValues.contains(group.getFirstAttribute("role_value")))
+                    .collect(Collectors.toList());
+
+            if (config.assignUserToRolesWithNoRoleType && matchingRoleGroups.isEmpty()) {
+                user.joinGroup(rolesCategoryGroup);
+            } else {
+                matchingRoleGroups.forEach(user::joinGroup);
+                user.leaveGroup(rolesCategoryGroup);
+            }
+        }
+    }
+
+    private GroupModel findNodeGroupByGroupId(RealmModel realm, String groupId, MapperConfig config) {
+        return realm.getGroupsStream()
+                .filter(group -> groupId.equals(group.getFirstAttribute("group_id")))
+                .filter(group -> "real".equals(group.getFirstAttribute("node_kind")))
+                .filter(group -> isUnderConfiguredRoot(group, config.groupRootPath))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private GroupModel findRolesCategoryGroup(GroupModel nodeGroup) {
+        return nodeGroup.getSubGroupsStream()
+                .filter(group -> "category".equals(group.getFirstAttribute("node_kind")))
+                .filter(group -> "roles".equals(group.getFirstAttribute("category_key")))
+                .filter(group -> nodeGroup.getId().equals(group.getParentId()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private Stream<GroupModel> findRoleGroups(GroupModel rolesCategoryGroup) {
+        if (rolesCategoryGroup == null) {
+            return Stream.empty();
+        }
+
+        return rolesCategoryGroup.getSubGroupsStream()
+                .filter(group -> "role".equals(group.getFirstAttribute("node_kind")));
+    }
+
+    private boolean hasAttribute(GroupModel group, String attributeName) {
+        return group.getFirstAttribute(attributeName) != null;
+    }
+
+    private boolean isUnderConfiguredRoot(GroupModel group, String groupRootPath) {
+        return groupRootPath == null || groupRootPath.isBlank() || getGroupPath(group).startsWith(groupRootPath);
+    }
+
     private String getGroupPath(GroupModel group) {
         StringBuilder path = new StringBuilder(group.getName());
         GroupModel parent = group.getParent();
@@ -88,118 +298,7 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
             path.insert(0, parent.getName() + "/");
             parent = parent.getParent();
         }
-        logger.info("Midata Group Path " + path.toString());
         return path.toString();
-    }
-
-    private void processMapRules(RealmModel realm, UserModel user,
-            IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
-
-        List<String> blacklist = mapperModel.getConfig().get(CONF_BLACKLIST) != null
-                ? Arrays.asList(mapperModel.getConfig().get(CONF_BLACKLIST).split(","))
-                : new ArrayList<>();
-        String groupRoot = mapperModel.getConfig().get(CONF_GROUP_ROOT_PATH);
-
-        logger.info("Midata-Group-Mapper: Starting group mapping with group root: " + groupRoot + " and blacklist: "
-                + blacklist);
-
-        JsonNode jsonNode = (JsonNode) context.getContextData().get(OIDCIdentityProvider.USER_INFO);
-        ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, Object> userInfoMap = objectMapper.convertValue(jsonNode, Map.class);
-        String userToken = context.getToken();
-
-        Object roles = userInfoMap.get("roles");
-        // Object events = new Object();
-
-        try {
-            // Get the idp host url from the context
-            String idpHostUrl = null;
-            try {
-                idpHostUrl = (new URI(
-                        (String) context.getIdpConfig().getConfig().get(OIDCIdentityProviderConfig.TOKEN_ENDPOINT_URL)))
-                        .getHost();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            }
-
-            // Get user events from idpHostUrl /de/oauth/profile with the user token
-            if (idpHostUrl != null && userToken != null) {
-                try {
-                    String profileUrl = "https://" + idpHostUrl + "/api/people/" + userInfoMap.get("sub");
-                    HttpClient httpClient = HttpClient.newHttpClient();
-                    HttpRequest request = HttpRequest.newBuilder()
-                            .uri(new URI(profileUrl))
-                            .header("Authorization", "Bearer " + userToken)
-                            .header("X-Scope", "events")
-                            .GET()
-                            .build();
-                    HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-                    if (response.statusCode() == 200) {
-                        JsonNode profileData = objectMapper.readTree(response.body());
-                        logger.info("User profile data: " + profileData.toString());
-                    }
-                } catch (Exception e) {
-                    logger.warning("Failed to retrieve user profile: " + e.getMessage());
-                }
-            }
-        } catch (Exception e) {
-            logger.warning("Midata-Group-Mapper: Error processing user events: " + e.getMessage());
-        }
-
-        if (!(roles instanceof List)) {
-            logger.info("Midata-Group-Mapper: Expected 'roles' to be a List, but got: "
-                    + (roles != null ? roles.getClass().getName() : "null"));
-            return;
-        }
-
-        try {
-            // Per role object in the list extract the ID from id field
-            List<String> incomingIds = ((List<?>) roles).stream()
-                    .filter(role -> role instanceof Map) // Ensure it's a Map
-                    .map(role -> (Map<?, ?>) role)
-                    .filter(roleMap -> roleMap.containsKey("group_id")) // Ensure it has a 'group_id' field
-                    .map(roleMap -> String.valueOf(roleMap.get("group_id"))) // Extract the 'group_id' as String
-                    .collect(Collectors.toList());
-
-            // Get all user groups which have an attribute "group_id" and "group_type",
-            // "node_kind" = "real" and the top group is the one defined in the config
-            List<GroupModel> userMidataGroups = user.getGroupsStream()
-                    .filter(g -> g.getFirstAttribute("group_id") != null)
-                    .filter(g -> g.getFirstAttribute("group_type") != null)
-                    .filter(g -> "real".equals(g.getFirstAttribute("node_kind")))
-                    .filter(g -> groupRoot == null || getGroupPath(g).startsWith(groupRoot))
-                    .collect(Collectors.toList());
-
-            for (GroupModel group : userMidataGroups) {
-                if (!incomingIds.contains(group.getFirstAttribute("group_id"))) {
-                    user.leaveGroup(group);
-                }
-            }
-
-            for (String id : incomingIds) {
-                // Check Blacklist first
-                if (!blacklist.isEmpty() && blacklist.contains(id)) {
-                    continue; // Skip blacklisted IDs
-                }
-
-                // assignUserToGroup(realm, user, id, groupRoot);
-                assignUserToGroup(realm, user, id, groupRoot);
-            }
-        } catch (Exception e) {
-            logger.warning("Midata-Group-Mapper: Error processing group mappings: " + e.getMessage());
-        }
-    }
-
-    private void assignUserToGroup(RealmModel realm, UserModel user, String id, String groupRoot) {
-        GroupModel group = realm.getGroupsStream()
-                .filter(g -> id.equals(g.getFirstAttribute("group_id")))
-                .filter(g -> "real".equals(g.getFirstAttribute("node_kind")))
-                .filter(g -> groupRoot == null || getGroupPath(g).startsWith(groupRoot))
-                .findFirst()
-                .orElse(null);
-        if (group != null) {
-            user.joinGroup(group);
-        }
     }
 
     @Override
@@ -224,7 +323,7 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
 
     @Override
     public String getHelpText() {
-        return "Maps Midata group memberships to Keycloak groups, with optional whitelist/blacklist filtering.";
+        return "Maps Midata group memberships to Keycloak groups, with optional blacklist filtering.";
     }
 
     @Override
@@ -238,7 +337,7 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
     }
 
     private void logMapperCall(String phase, IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
-        logger.info("Midata-Group-Mapper [" + phase + "]"
+        LOGGER.info("Midata-Group-Mapper [" + phase + "]"
                 + " mapperId=" + mapperModel.getId()
                 + ", mapperName=" + mapperModel.getName()
                 + ", providerId=" + mapperModel.getIdentityProviderMapper()
@@ -248,4 +347,43 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
                 + ", kcIdpAliasFromContext=" + context.getIdpConfig().getAlias());
     }
 
+    private static final class MapperConfig {
+        private final Set<String> blacklist;
+        private final String groupRootPath;
+        private final boolean assignUserToGroupNode;
+        private final boolean assignUserToRolesWithNoRoleType;
+
+        private MapperConfig(Set<String> blacklist, String groupRootPath,
+                boolean assignUserToGroupNode, boolean assignUserToRolesWithNoRoleType) {
+            this.blacklist = blacklist;
+            this.groupRootPath = groupRootPath;
+            this.assignUserToGroupNode = assignUserToGroupNode;
+            this.assignUserToRolesWithNoRoleType = assignUserToRolesWithNoRoleType;
+        }
+
+        private static MapperConfig from(IdentityProviderMapperModel mapperModel) {
+            String blacklistConfig = mapperModel.getConfig().get(CONF_BLACKLIST);
+
+            Set<String> blacklist = blacklistConfig == null || blacklistConfig.isBlank()
+                    ? Set.of()
+                    : Arrays.stream(blacklistConfig.split(","))
+                            .map(String::trim)
+                            .filter(value -> !value.isEmpty())
+                            .collect(Collectors.toSet());
+
+            String groupRootPath = mapperModel.getConfig().get(CONF_GROUP_ROOT_PATH);
+
+            boolean assignUserToGroupNode = Boolean.parseBoolean(
+                    mapperModel.getConfig().getOrDefault(CONF_ASSIGN_USER_TO_GROUP_NODE, "true"));
+
+            boolean assignUserToRolesWithNoRoleType = Boolean.parseBoolean(
+                    mapperModel.getConfig().getOrDefault(CONF_ASSIGN_USER_TO_ROLES_WITH_NO_ROLE_TYPE, "false"));
+
+            return new MapperConfig(
+                    blacklist,
+                    groupRootPath,
+                    assignUserToGroupNode,
+                    assignUserToRolesWithNoRoleType);
+        }
+    }
 }
