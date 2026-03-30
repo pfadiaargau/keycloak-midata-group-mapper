@@ -84,14 +84,12 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
     @Override
     public void importNewUser(KeycloakSession session, RealmModel realm, UserModel user,
             IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
-        logMapperCall("importNewUser", mapperModel, context);
         processMapRules(realm, user, mapperModel, context);
     }
 
     @Override
     public void updateBrokeredUser(KeycloakSession session, RealmModel realm, UserModel user,
             IdentityProviderMapperModel mapperModel, BrokeredIdentityContext context) {
-        logMapperCall("updateBrokeredUser", mapperModel, context);
         processMapRules(realm, user, mapperModel, context);
     }
 
@@ -103,7 +101,10 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
         LOGGER.info("Midata-Group-Mapper: Starting group mapping with group root: " + config.groupRootPath
                 + " and blacklist: " + config.blacklist);
 
-        List<MidataRole> incomingRoles = extractIncomingRoles(context);
+        JsonNode userInfo = getUserInfoNode(context);
+        String externalUserId = extractExternalUserId(userInfo);
+
+        List<MidataRole> incomingRoles = extractIncomingRoles(userInfo);
         if (incomingRoles.isEmpty()) {
             LOGGER.info("Midata-Group-Mapper: No incoming roles found");
         }
@@ -119,16 +120,42 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
 
         syncExistingMemberships(user, existingMappedNodeGroups, rolesByGroupId, config);
         joinMissingMemberships(realm, user, rolesByGroupId, config);
+
+        syncEventMemberships(realm, user, config, externalUserId);
     }
 
-    private List<MidataRole> extractIncomingRoles(BrokeredIdentityContext context) {
+    private JsonNode getUserInfoNode(BrokeredIdentityContext context) {
         Object userInfo = context.getContextData().get(OIDCIdentityProvider.USER_INFO);
-        if (!(userInfo instanceof JsonNode jsonNode)) {
-            LOGGER.warning("Midata-Group-Mapper: USER_INFO is missing or not a JsonNode");
+        if (userInfo instanceof JsonNode jsonNode) {
+            return jsonNode;
+        }
+
+        LOGGER.warning("Midata-Group-Mapper: USER_INFO is missing or not a JsonNode");
+        return null;
+    }
+
+    private String extractExternalUserId(JsonNode userInfo) {
+        if (userInfo == null) {
+            return null;
+        }
+
+        JsonNode subNode = userInfo.get("sub");
+        if (subNode == null || subNode.isNull()) {
+            LOGGER.warning("Midata-Group-Mapper: Could not extract external user id from 'sub'");
+            return null;
+        }
+
+        String externalUserId = subNode.asText(null);
+        LOGGER.info("Midata-Group-Mapper: External user id resolved to: " + externalUserId);
+        return externalUserId;
+    }
+
+    private List<MidataRole> extractIncomingRoles(JsonNode userInfo) {
+        if (userInfo == null) {
             return List.of();
         }
 
-        Map<String, Object> userInfoMap = OBJECT_MAPPER.convertValue(jsonNode, Map.class);
+        Map<String, Object> userInfoMap = OBJECT_MAPPER.convertValue(userInfo, Map.class);
         Object rolesObject = userInfoMap.get("roles");
 
         if (!(rolesObject instanceof List<?> rolesList)) {
@@ -254,6 +281,57 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
                 user.leaveGroup(rolesCategoryGroup);
             }
         }
+    }
+
+    private void syncEventMemberships(RealmModel realm, UserModel user, MapperConfig config, String externalUserId) {
+        LOGGER.info("Start Event Sync for userId: " + externalUserId);
+        if (externalUserId == null || externalUserId.isBlank()) {
+            LOGGER.warning("Midata-Group-Mapper: Skipping event sync because external user id is missing");
+            return;
+        }
+
+        List<GroupModel> desiredEventSubGroups = realm.getGroupsStream()
+                .filter(group -> "event".equals(group.getFirstAttribute("node_kind")))
+                .filter(group -> isUnderConfiguredRoot(group, config.groupRootPath))
+                .flatMap(eventGroup -> eventGroup.getSubGroupsStream())
+                .filter(subGroup -> participantIdsContain(subGroup.getFirstAttribute("participant_ids"),
+                        externalUserId))
+                .collect(Collectors.toList());
+
+        LOGGER.info("Found " + desiredEventSubGroups.size() + " event subgroups for userId: " + externalUserId);
+        Set<String> desiredEventSubGroupIds = desiredEventSubGroups.stream()
+                .map(GroupModel::getId)
+                .collect(Collectors.toSet());
+
+        
+        List<GroupModel> currentEventSubGroups = user.getGroupsStream()
+                .filter(group -> isDirectChildOfEventGroupUnderRoot(group, config.groupRootPath))
+                .collect(Collectors.toList());
+        for (GroupModel currentGroup : currentEventSubGroups) {
+            if (!desiredEventSubGroupIds.contains(currentGroup.getId())) {
+                user.leaveGroup(currentGroup);
+            }
+        }
+
+        desiredEventSubGroups.forEach(user::joinGroup);
+    }
+
+    private boolean isDirectChildOfEventGroupUnderRoot(GroupModel group, String groupRootPath) {
+        GroupModel parent = group.getParent();
+        return parent != null
+                && "event".equals(parent.getFirstAttribute("node_kind"))
+                && isUnderConfiguredRoot(parent, groupRootPath);
+    }
+
+    private boolean participantIdsContain(String participantIds, String userId) {
+        if (participantIds == null || participantIds.isBlank() || userId == null || userId.isBlank()) {
+            return false;
+        }
+
+        return Arrays.stream(participantIds.split(","))
+                .map(String::trim)
+                .filter(value -> !value.isEmpty())
+                .anyMatch(userId::equals);
     }
 
     private GroupModel findNodeGroupByGroupId(RealmModel realm, String groupId, MapperConfig config) {

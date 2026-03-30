@@ -12,4 +12,4 @@ RUN /opt/keycloak/bin/kc.sh build
 USER 1000
 
 # start-dev is fine for local, it will use the build-time configuration
-ENTRYPOINT ["/opt/keycloak/bin/kc.sh", "start-dev", "--http-enabled=true", "--hostname-strict=false", "--log-level=DEBUG" ]
+ENTRYPOINT ["/opt/keycloak/bin/kc.sh", "start-dev", "--http-enabled=true", "--hostname-strict=false" ]
