@@ -1,7 +1,16 @@
 package ch.pfadiaargau.keycloak.identityprovider.mapper;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,6 +33,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.provider.ProviderConfigProperty;
+import org.keycloak.representations.AccessTokenResponse;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,6 +46,11 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
 
     private static final Logger LOGGER = Logger.getLogger(MidataGroupMapper.class.getName());
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(5))
+            .build();
+    private static final Duration MIDATA_REQUEST_TIMEOUT = Duration.ofSeconds(10);
+    private static final int MIDATA_PAGE_SIZE = 100;
 
     private static final Set<IdentityProviderSyncMode> IDENTITY_PROVIDER_SYNC_MODES = new HashSet<>(
             Arrays.asList(IdentityProviderSyncMode.values()));
@@ -49,6 +64,8 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
     public static final String CONF_GROUP_ROOT_PATH = "group_root_path";
     public static final String CONF_ASSIGN_USER_TO_GROUP_NODE = "assign_user_to_group_node";
     public static final String CONF_ASSIGN_USER_TO_ROLES_WITH_NO_ROLE_TYPE = "assign_user_to_roles_with_no_role_type";
+    public static final String CONF_MIDATA_API_URL = "midata_api_url";
+    public static final String CONF_MIDATA_API_TOKEN = "midata_api_token";
 
     protected static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
 
@@ -79,6 +96,25 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
         assignUserToRolesWithNoRoleType.setType(ProviderConfigProperty.BOOLEAN_TYPE);
         assignUserToRolesWithNoRoleType.setDefaultValue("false");
         configProperties.add(assignUserToRolesWithNoRoleType);
+
+        ProviderConfigProperty midataApiUrl = new ProviderConfigProperty();
+        midataApiUrl.setName(CONF_MIDATA_API_URL);
+        midataApiUrl.setLabel("Midata API URL");
+        midataApiUrl.setHelpText("Base URL of the Midata instance used to fetch event participations "
+                + "(e.g. 'https://db.scout.ch')");
+        midataApiUrl.setType(ProviderConfigProperty.STRING_TYPE);
+        midataApiUrl.setDefaultValue("https://db.scout.ch");
+        configProperties.add(midataApiUrl);
+
+        ProviderConfigProperty midataApiToken = new ProviderConfigProperty();
+        midataApiToken.setName(CONF_MIDATA_API_TOKEN);
+        midataApiToken.setLabel("Midata Service Token");
+        midataApiToken.setHelpText("Optional Midata service token (sent as X-Token) used to fetch event participations. "
+                + "If empty, the user's access token from the identity provider is used, which requires "
+                + "the 'api' or 'event_participations' scope.");
+        midataApiToken.setType(ProviderConfigProperty.PASSWORD);
+        midataApiToken.setSecret(true);
+        configProperties.add(midataApiToken);
     }
 
     @Override
@@ -121,7 +157,17 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
         syncExistingMemberships(user, existingMappedNodeGroups, rolesByGroupId, config);
         joinMissingMemberships(realm, user, rolesByGroupId, config);
 
-        syncEventMemberships(realm, user, config, externalUserId);
+        syncCollectionMemberships(realm, user, rolesByGroupId, config);
+
+        syncEventMemberships(realm, user, config, externalUserId, getFederatedAccessToken(context));
+    }
+
+    private String getFederatedAccessToken(BrokeredIdentityContext context) {
+        Object tokenResponse = context.getContextData().get(OIDCIdentityProvider.FEDERATED_ACCESS_TOKEN_RESPONSE);
+        if (tokenResponse instanceof AccessTokenResponse accessTokenResponse) {
+            return accessTokenResponse.getToken();
+        }
+        return null;
     }
 
     private JsonNode getUserInfoNode(BrokeredIdentityContext context) {
@@ -283,19 +329,126 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
         }
     }
 
-    private void syncEventMemberships(RealmModel realm, UserModel user, MapperConfig config, String externalUserId) {
+    /**
+     * Assigns the user to every collection group for which they have one of the collection_roles in the
+     * group owning the collection or in any group below it, and removes them from all other collections.
+     */
+    private void syncCollectionMemberships(RealmModel realm, UserModel user,
+            Map<String, List<MidataRole>> rolesByGroupId, MapperConfig config) {
+
+        List<GroupModel> collectionGroups = realm.getGroupsStream()
+                .filter(group -> "collection".equals(group.getFirstAttribute("node_kind")))
+                .filter(group -> isUnderConfiguredRoot(group, config.groupRootPath))
+                .collect(Collectors.toList());
+
+        Map<String, Set<String>> groupIdsBelowByKeycloakId = new HashMap<>();
+        Set<String> desiredCollectionIds = new HashSet<>();
+
+        for (GroupModel collectionGroup : collectionGroups) {
+            GroupModel ownerGroup = findOwningRealGroup(collectionGroup);
+            if (ownerGroup == null) {
+                LOGGER.warning("Midata-Group-Mapper: Collection group without owning group: "
+                        + getGroupPath(collectionGroup));
+                continue;
+            }
+
+            Set<String> collectionRoles = collectionGroup.getAttributeStream("collection_roles")
+                    .collect(Collectors.toSet());
+            Set<String> groupIdsBelow = groupIdsBelowByKeycloakId.computeIfAbsent(ownerGroup.getId(),
+                    key -> collectRealGroupIds(ownerGroup, new HashSet<>()));
+
+            boolean hasMatchingRole = groupIdsBelow.stream()
+                    .flatMap(groupId -> rolesByGroupId.getOrDefault(groupId, List.of()).stream())
+                    .anyMatch(role -> collectionRoles.contains(role.getRole()));
+
+            if (hasMatchingRole) {
+                desiredCollectionIds.add(collectionGroup.getId());
+            }
+        }
+
+        LOGGER.info("Midata-Group-Mapper: Found " + desiredCollectionIds.size() + " collection groups for user");
+
+        user.getGroupsStream()
+                .filter(group -> "collection".equals(group.getFirstAttribute("node_kind")))
+                .filter(group -> isUnderConfiguredRoot(group, config.groupRootPath))
+                .filter(group -> !desiredCollectionIds.contains(group.getId()))
+                .collect(Collectors.toList())
+                .forEach(user::leaveGroup);
+
+        collectionGroups.stream()
+                .filter(group -> desiredCollectionIds.contains(group.getId()))
+                .forEach(user::joinGroup);
+    }
+
+    private GroupModel findOwningRealGroup(GroupModel group) {
+        GroupModel parent = group.getParent();
+        while (parent != null && !"real".equals(parent.getFirstAttribute("node_kind"))) {
+            parent = parent.getParent();
+        }
+        return parent;
+    }
+
+    /**
+     * Collects the Midata group ids of the given real group and all real groups below it.
+     * Category folders are traversed, roles, events and collections are skipped.
+     */
+    private Set<String> collectRealGroupIds(GroupModel group, Set<String> groupIds) {
+        if ("real".equals(group.getFirstAttribute("node_kind")) && hasAttribute(group, "group_id")) {
+            groupIds.add(group.getFirstAttribute("group_id"));
+        }
+
+        group.getSubGroupsStream()
+                .filter(subGroup -> "real".equals(subGroup.getFirstAttribute("node_kind"))
+                        || ("category".equals(subGroup.getFirstAttribute("node_kind"))
+                                && !Set.of("roles", "events", "collections")
+                                        .contains(subGroup.getFirstAttribute("category_key"))))
+                .forEach(subGroup -> collectRealGroupIds(subGroup, groupIds));
+
+        return groupIds;
+    }
+
+    private void syncEventMemberships(RealmModel realm, UserModel user, MapperConfig config,
+            String externalUserId, String userAccessToken) {
         LOGGER.info("Start Event Sync for userId: " + externalUserId);
         if (externalUserId == null || externalUserId.isBlank()) {
             LOGGER.warning("Midata-Group-Mapper: Skipping event sync because external user id is missing");
             return;
         }
 
-        List<GroupModel> desiredEventSubGroups = realm.getGroupsStream()
+        Map<String, GroupModel> eventGroupsByEventId = realm.getGroupsStream()
                 .filter(group -> "event".equals(group.getFirstAttribute("node_kind")))
+                .filter(group -> hasAttribute(group, "event_id"))
                 .filter(group -> isUnderConfiguredRoot(group, config.groupRootPath))
-                .flatMap(eventGroup -> eventGroup.getSubGroupsStream())
-                .filter(subGroup -> participantIdsContain(subGroup.getFirstAttribute("participant_ids"),
-                        externalUserId))
+                .collect(Collectors.toMap(
+                        group -> group.getFirstAttribute("event_id"),
+                        group -> group,
+                        (first, second) -> first,
+                        LinkedHashMap::new));
+
+        Map<String, Set<String>> roleTypesByEventId;
+        if (eventGroupsByEventId.isEmpty()) {
+            roleTypesByEventId = Map.of();
+        } else {
+            try {
+                roleTypesByEventId = fetchEventRoleTypes(config, userAccessToken, externalUserId,
+                        eventGroupsByEventId.keySet());
+            } catch (IOException | InterruptedException | RuntimeException e) {
+                if (e instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
+                // Keep the current event memberships instead of removing them because of an API failure
+                LOGGER.warning("Midata-Group-Mapper: Skipping event sync, could not fetch event participations: "
+                        + e.getMessage());
+                return;
+            }
+        }
+
+        List<GroupModel> desiredEventSubGroups = roleTypesByEventId.entrySet().stream()
+                .filter(entry -> eventGroupsByEventId.containsKey(entry.getKey()))
+                .flatMap(entry -> eventGroupsByEventId.get(entry.getKey()).getSubGroupsStream()
+                        .filter(subGroup -> "category".equals(subGroup.getFirstAttribute("node_kind")))
+                        .filter(subGroup -> subGroup.getAttributeStream("event_roles")
+                                .anyMatch(entry.getValue()::contains)))
                 .collect(Collectors.toList());
 
         LOGGER.info("Found " + desiredEventSubGroups.size() + " event subgroups for userId: " + externalUserId);
@@ -303,7 +456,6 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
                 .map(GroupModel::getId)
                 .collect(Collectors.toSet());
 
-        
         List<GroupModel> currentEventSubGroups = user.getGroupsStream()
                 .filter(group -> isDirectChildOfEventGroupUnderRoot(group, config.groupRootPath))
                 .collect(Collectors.toList());
@@ -316,22 +468,93 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
         desiredEventSubGroups.forEach(user::joinGroup);
     }
 
+    /**
+     * Fetches the active participations of the given person in the given events from
+     * /api/event_participations and returns the event role types per event id.
+     */
+    private Map<String, Set<String>> fetchEventRoleTypes(MapperConfig config, String userAccessToken,
+            String participantId, Set<String> eventIds) throws IOException, InterruptedException {
+
+        if (config.midataApiUrl == null || config.midataApiUrl.isBlank()) {
+            throw new IllegalStateException("Midata API URL is not configured");
+        }
+
+        Map<String, Set<String>> roleTypesByEventId = new HashMap<>();
+        for (int page = 1;; page++) {
+            String query = String.join("&",
+                    queryParam("filter[participant_id][eq]", participantId),
+                    queryParam("filter[participant_type][eq]", "Person"),
+                    queryParam("filter[event_id][eq]", String.join(",", eventIds)),
+                    queryParam("include", "roles"),
+                    queryParam("page[size]", String.valueOf(MIDATA_PAGE_SIZE)),
+                    queryParam("page[number]", String.valueOf(page)));
+
+            JsonNode body = getMidataJson(config, userAccessToken, "/api/event_participations?" + query);
+
+            Map<String, String> roleTypesById = new HashMap<>();
+            for (JsonNode included : body.path("included")) {
+                if ("event_roles".equals(included.path("type").asText())) {
+                    roleTypesById.put(included.path("id").asText(),
+                            included.path("attributes").path("type").asText(null));
+                }
+            }
+
+            JsonNode participations = body.path("data");
+            for (JsonNode participation : participations) {
+                String eventId = participation.path("attributes").path("event_id").asText(null);
+                if (eventId == null) {
+                    continue;
+                }
+
+                Set<String> roleTypes = roleTypesByEventId.computeIfAbsent(eventId, key -> new HashSet<>());
+                for (JsonNode roleRef : participation.path("relationships").path("roles").path("data")) {
+                    String roleType = roleTypesById.get(roleRef.path("id").asText());
+                    if (roleType != null) {
+                        roleTypes.add(roleType);
+                    }
+                }
+            }
+
+            if (participations.size() < MIDATA_PAGE_SIZE) {
+                return roleTypesByEventId;
+            }
+        }
+    }
+
+    private JsonNode getMidataJson(MapperConfig config, String userAccessToken, String pathAndQuery)
+            throws IOException, InterruptedException {
+
+        HttpRequest.Builder request = HttpRequest.newBuilder()
+                .uri(URI.create(config.midataApiUrl.replaceAll("/+$", "") + pathAndQuery))
+                .timeout(MIDATA_REQUEST_TIMEOUT)
+                .header("Accept", "application/vnd.api+json")
+                .GET();
+
+        if (config.midataApiToken != null && !config.midataApiToken.isBlank()) {
+            request.header("X-Token", config.midataApiToken);
+        } else if (userAccessToken != null && !userAccessToken.isBlank()) {
+            request.header("Authorization", "Bearer " + userAccessToken);
+        } else {
+            throw new IllegalStateException("Neither a Midata service token nor a user access token is available");
+        }
+
+        HttpResponse<String> response = HTTP_CLIENT.send(request.build(), HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) {
+            throw new IOException("Midata API returned HTTP " + response.statusCode() + ": " + response.body());
+        }
+
+        return OBJECT_MAPPER.readTree(response.body());
+    }
+
+    private static String queryParam(String name, String value) {
+        return URLEncoder.encode(name, StandardCharsets.UTF_8) + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
     private boolean isDirectChildOfEventGroupUnderRoot(GroupModel group, String groupRootPath) {
         GroupModel parent = group.getParent();
         return parent != null
                 && "event".equals(parent.getFirstAttribute("node_kind"))
                 && isUnderConfiguredRoot(parent, groupRootPath);
-    }
-
-    private boolean participantIdsContain(String participantIds, String userId) {
-        if (participantIds == null || participantIds.isBlank() || userId == null || userId.isBlank()) {
-            return false;
-        }
-
-        return Arrays.stream(participantIds.split(","))
-                .map(String::trim)
-                .filter(value -> !value.isEmpty())
-                .anyMatch(userId::equals);
     }
 
     private GroupModel findNodeGroupByGroupId(RealmModel realm, String groupId, MapperConfig config) {
@@ -430,13 +653,18 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
         private final String groupRootPath;
         private final boolean assignUserToGroupNode;
         private final boolean assignUserToRolesWithNoRoleType;
+        private final String midataApiUrl;
+        private final String midataApiToken;
 
         private MapperConfig(Set<String> blacklist, String groupRootPath,
-                boolean assignUserToGroupNode, boolean assignUserToRolesWithNoRoleType) {
+                boolean assignUserToGroupNode, boolean assignUserToRolesWithNoRoleType,
+                String midataApiUrl, String midataApiToken) {
             this.blacklist = blacklist;
             this.groupRootPath = groupRootPath;
             this.assignUserToGroupNode = assignUserToGroupNode;
             this.assignUserToRolesWithNoRoleType = assignUserToRolesWithNoRoleType;
+            this.midataApiUrl = midataApiUrl;
+            this.midataApiToken = midataApiToken;
         }
 
         private static MapperConfig from(IdentityProviderMapperModel mapperModel) {
@@ -457,11 +685,16 @@ public class MidataGroupMapper extends AbstractIdentityProviderMapper {
             boolean assignUserToRolesWithNoRoleType = Boolean.parseBoolean(
                     mapperModel.getConfig().getOrDefault(CONF_ASSIGN_USER_TO_ROLES_WITH_NO_ROLE_TYPE, "false"));
 
+            String midataApiUrl = mapperModel.getConfig().getOrDefault(CONF_MIDATA_API_URL, "https://db.scout.ch");
+            String midataApiToken = mapperModel.getConfig().get(CONF_MIDATA_API_TOKEN);
+
             return new MapperConfig(
                     blacklist,
                     groupRootPath,
                     assignUserToGroupNode,
-                    assignUserToRolesWithNoRoleType);
+                    assignUserToRolesWithNoRoleType,
+                    midataApiUrl,
+                    midataApiToken);
         }
     }
 }

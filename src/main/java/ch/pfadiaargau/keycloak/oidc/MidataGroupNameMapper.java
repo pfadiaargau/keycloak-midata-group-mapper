@@ -10,6 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -45,12 +46,14 @@ import org.keycloak.representations.IDToken;
  *                               -> <P>_<Stufe>_<Unit>_Leitende | _TN e.g. Adler_Wolfsstufe_Meute_Tavi_TN
  *    Leader = has one of "stufe_leader_roles" in that node or below it. Members of non-Stufe
  *    nodes below a Stufe (Inaktiv, Warteliste, ...) are ignored.
+ *    Toggles "emit_stufe_leaders" / "emit_stufe_tn" switch off the _Leitende / _TN names (Stufen and
+ *    units), e.g. when collections provide them. A leader never falls back to _TN.
  *
  * 3. Role groups ("role_groups"): scope:Name=Role1|Role2;...   scope = stufe|abteilung|kantonalverband
  *      stufe:Stufenleitung=Adressverwaltung|Einheitsleitung -> Hochwacht_Wolfsstufe_Stufenleitung
  *
  * 4. Grouped groups ("grouped_groups"): Name=Glob1|Glob2;...  globs on the part after "<P>_",
- *    evaluated in order (later entries may use earlier ones)
+ *    evaluated in order (later entries may use earlier ones). Empty by default, use collections instead.
  *      Stufenleitende=*_Stufenleitung -> Hochwacht_Stufenleitende
  *
  * 5. Events (toggle "emit_events"): member of a category below a node_kind=event group
@@ -59,10 +62,23 @@ import org.keycloak.representations.IDToken;
  * 6. Member types ("member_types"): any member of a node of that group_type inside an Abteilung
  *      Group::Elternrat=Elternrat -> Hochwacht_Elternrat
  *
+ * 6b. Collections (toggle "emit_collections", off by default): member of a node_kind=collection
+ *    group -> <P>_<Collection> with <P> of the group owning the collection
+ *      e.g. PfadiAargau_Leitende, Hochwacht_Leitende_Biberstufe
+ *    Added after the grouped groups, so collection names never feed grouped-group globs.
+ *
  * 7. Client roles (toggle "include_client_roles"): the requesting client's roles from direct
  *    user mappings and from every group the user is in plus its parents (composites expanded),
  *    emitted under their own name, e.g. KaLei, Vorstand. Attach Gremium roles to the Gremium's
  *    "Rollen" folder so they don't leak into nested Gremien.
+ *
+ * Ignored roles ("ignored_roles", last role segment, default Passivmitglied,Ehrenmitglied) are
+ * skipped completely: someone with only those roles gets no groups and cannot log in.
+ *
+ * 8. Quota (optional, "quota_claim"): users whose groups ALL match "participant_groups"
+ *    (default *_TN: Stufe TN and event Teilnehmende) get "participant_quota" (default "0 B"),
+ *    everyone else "default_quota" (default "default" = Nextcloud default quota).
+ *    In Nextcloud user_oidc: --mapping-quota=<quota_claim>
  *
  * Memberships count from role subgroups, real nodes and "Rollen" folders (roles without own
  * subgroup), so it works with assign_user_to_group_node off.
@@ -94,13 +110,21 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
     static final String CFG_TN_SUFFIX = "tn_suffix";
     static final String CFG_EMIT_RAW_ROLES = "emit_raw_roles";
     static final String CFG_EMIT_UNITS = "emit_units";
+    static final String CFG_EMIT_STUFE_LEADERS = "emit_stufe_leaders";
+    static final String CFG_EMIT_STUFE_TN = "emit_stufe_tn";
     static final String CFG_ROLE_GROUPS = "role_groups";
     static final String CFG_GROUPED_GROUPS = "grouped_groups";
     static final String CFG_MEMBER_TYPES = "member_types";
     static final String CFG_EMIT_EVENTS = "emit_events";
+    static final String CFG_EMIT_COLLECTIONS = "emit_collections";
     static final String CFG_EVENT_ALIASES = "event_category_aliases";
     static final String CFG_INCLUDE_CLIENT_ROLES = "include_client_roles";
     static final String CFG_EXCLUDED_CLIENT_ROLES = "excluded_client_roles";
+    static final String CFG_IGNORED_ROLES = "ignored_roles";
+    static final String CFG_QUOTA_CLAIM = "quota_claim";
+    static final String CFG_PARTICIPANT_GROUPS = "participant_groups";
+    static final String CFG_PARTICIPANT_QUOTA = "participant_quota";
+    static final String CFG_DEFAULT_QUOTA = "default_quota";
 
     // Defaults: verify role values against model/roles in midata-roles-importer.
     static final String DEF_PREFIX_ATTR = "nextcloud_prefix";
@@ -119,10 +143,13 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
     static final String DEF_LEADER_SUFFIX = "_Leitende";
     static final String DEF_TN_SUFFIX = "_TN";
     static final String DEF_ROLE_GROUPS = "stufe:Stufenleitung=Adressverwaltung|Einheitsleitung";
-    static final String DEF_GROUPED_GROUPS =
-            "Stufenleitende=*_Stufenleitung;Leitende=*_Leitende;kantonalverband:Leitende=*_Leitende";
+    static final String DEF_GROUPED_GROUPS = "";
     static final String DEF_EVENT_ALIASES = "Teilnehmende=TN";
     static final String DEF_MEMBER_TYPES = "Group::Elternrat=Elternrat";
+    static final String DEF_IGNORED_ROLES = "Passivmitglied,Ehrenmitglied";
+    static final String DEF_PARTICIPANT_GROUPS = "*_TN";
+    static final String DEF_PARTICIPANT_QUOTA = "0 B";
+    static final String DEF_DEFAULT_QUOTA = "default";
 
     private static final List<ProviderConfigProperty> CONFIG = new ArrayList<>(
             ProviderConfigurationBuilder.create()
@@ -149,6 +176,14 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
                 .property().name(CFG_EMIT_UNITS).label("Emit units")
                     .helpText("Emit <P>_<Stufe>_<Unit>_Leitende/_TN for Meuten, Fähnli, Rudel, ...")
                     .type(ProviderConfigProperty.BOOLEAN_TYPE).defaultValue("false").add()
+                .property().name(CFG_EMIT_STUFE_LEADERS).label("Emit Stufe leaders")
+                    .helpText("Emit <P>_<Stufe>_Leitende (and unit _Leitende). Turn off when collections "
+                            + "provide these names.")
+                    .type(ProviderConfigProperty.BOOLEAN_TYPE).defaultValue("true").add()
+                .property().name(CFG_EMIT_STUFE_TN).label("Emit Stufe TN")
+                    .helpText("Emit <P>_<Stufe>_TN (and unit _TN). Users whose only groups are TN groups "
+                            + "get no groups at all when this is off and cannot log in.")
+                    .type(ProviderConfigProperty.BOOLEAN_TYPE).defaultValue("true").add()
                 .property().name(CFG_ROLE_GROUPS).label("Role groups")
                     .helpText("scope:Name=Role1|Role2 entries separated by ';'. "
                             + "scope = stufe | abteilung | kantonalverband.")
@@ -165,6 +200,10 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
                 .property().name(CFG_EMIT_EVENTS).label("Emit events")
                     .helpText("Emit <EventName>_<Category> for event participant categories.")
                     .type(ProviderConfigProperty.BOOLEAN_TYPE).defaultValue("true").add()
+                .property().name(CFG_EMIT_COLLECTIONS).label("Emit collections")
+                    .helpText("Emit <P>_<Collection> for collection groups (Sammlungen), with <P> of the group "
+                            + "owning the collection, e.g. PfadiAargau_Leitende.")
+                    .type(ProviderConfigProperty.BOOLEAN_TYPE).defaultValue("false").add()
                 .property().name(CFG_EVENT_ALIASES).label("Event category aliases (CategoryName=Suffix)")
                     .type(ProviderConfigProperty.STRING_TYPE).defaultValue(DEF_EVENT_ALIASES).add()
                 .property().name(CFG_INCLUDE_CLIENT_ROLES).label("Include client roles")
@@ -172,7 +211,25 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
                     .type(ProviderConfigProperty.BOOLEAN_TYPE).defaultValue("true").add()
                 .property().name(CFG_EXCLUDED_CLIENT_ROLES).label("Excluded client roles")
                     .helpText("Comma-separated client roles not to emit, e.g. an access-gate role.")
-                    .type(ProviderConfigProperty.STRING_TYPE).defaultValue("").add()                .build());
+                    .type(ProviderConfigProperty.STRING_TYPE).defaultValue("").add()
+                .property().name(CFG_IGNORED_ROLES).label("Ignored roles (last role segment)")
+                    .helpText("Comma-separated MiData roles that give no group at all, "
+                            + "e.g. Passivmitglied,Ehrenmitglied. Users with only these roles cannot log in.")
+                    .type(ProviderConfigProperty.STRING_TYPE).defaultValue(DEF_IGNORED_ROLES).add()
+                .property().name(CFG_QUOTA_CLAIM).label("Quota claim name")
+                    .helpText("Empty = no quota claim. Otherwise e.g. 'quota' and in user_oidc "
+                            + "--mapping-quota=quota.")
+                    .type(ProviderConfigProperty.STRING_TYPE).defaultValue("").add()
+                .property().name(CFG_PARTICIPANT_GROUPS).label("Participant groups (globs, '|'-separated)")
+                    .helpText("A user whose emitted groups ALL match one of these gets the participant quota.")
+                    .type(ProviderConfigProperty.STRING_TYPE).defaultValue(DEF_PARTICIPANT_GROUPS).add()
+                .property().name(CFG_PARTICIPANT_QUOTA).label("Participant quota")
+                    .helpText("e.g. '0 B' (no personal space) or '100 MB'.")
+                    .type(ProviderConfigProperty.STRING_TYPE).defaultValue(DEF_PARTICIPANT_QUOTA).add()
+                .property().name(CFG_DEFAULT_QUOTA).label("Quota for everyone else")
+                    .helpText("'default' = Nextcloud default quota, 'none' = unlimited, or e.g. '10 GB'.")
+                    .type(ProviderConfigProperty.STRING_TYPE).defaultValue(DEF_DEFAULT_QUOTA).add()
+                .build());
 
     static {
         OIDCAttributeMapperHelper.addTokenClaimNameConfig(CONFIG);
@@ -184,7 +241,7 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
     @Override public String getDisplayCategory() { return TOKEN_MAPPER_CATEGORY; }
     @Override public String getHelpText() {
         return "Derives group names from MiData memberships (roles, Stufen, units, events, role groups, "
-             + "grouped groups), adds the client's roles and merges everything into the claim.";
+             + "grouped groups, collections), adds the client's roles and merges everything into the claim.";
     }
     @Override public List<ProviderConfigProperty> getConfigProperties() { return CONFIG; }
 
@@ -200,22 +257,48 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
         List<GroupModel> groups = user.getGroupsStream().toList();
 
         groups.forEach(g -> collect(g, cfg, r));
-        r.stufen.forEach((base, leader) -> r.names.add(base + (leader ? cfg.leaderSuffix : cfg.tnSuffix)));
-        r.units.forEach((base, leader) -> r.names.add(base + (leader ? cfg.leaderSuffix : cfg.tnSuffix)));
+        r.stufen.forEach((base, leader) -> addStufeName(base, leader, cfg, r));
+        r.units.forEach((base, leader) -> addStufeName(base, leader, cfg, r));
         applyGroupedGroups(cfg, r);
+        r.names.addAll(r.collections);
 
         if (cfg.includeClientRoles) {
             addClientRoles(user, groups, ctx.getClientSession().getClient(), cfg, r);
         }
 
+        if (r.names.isEmpty()) return; // no Pfadi Aargau group: no claims, login is refused
+
+        if (!cfg.quotaClaim.isBlank()) {
+            boolean participantOnly = r.names.stream()
+                    .allMatch(n -> cfg.participantGroups.stream().anyMatch(p -> p.matcher(n).matches()));
+            token.getOtherClaims().put(cfg.quotaClaim, participantOnly ? cfg.participantQuota : cfg.defaultQuota);
+        }
+
         String claim = model.getConfig().get(OIDCAttributeMapperHelper.TOKEN_CLAIM_NAME);
-        if (claim == null || claim.isBlank() || r.names.isEmpty()) return;
+        if (claim == null || claim.isBlank()) return;
         merge(token, claim, r.names);
+    }
+
+    private static void addStufeName(String base, boolean leader, Cfg cfg, Result r) {
+        if (leader ? cfg.emitStufeLeaders : cfg.emitStufeTn) {
+            r.names.add(base + (leader ? cfg.leaderSuffix : cfg.tnSuffix));
+        }
     }
 
     private void collect(GroupModel g, Cfg cfg, Result r) {
         String kind = g.getFirstAttribute("node_kind");
         if (kind == null) return;
+        if ("collection".equals(kind)) {
+            GroupModel owner = firstReal(g);
+            if (cfg.emitCollections && owner != null) {
+                r.collections.add(prefix(owner, cfg) + "_" + sanitize(g.getName()));
+            }
+            return;
+        }
+        if ("role".equals(kind)) {
+            String rv = g.getFirstAttribute("role_value");
+            if (rv != null && cfg.ignoredRoles.contains(lastSegment(rv))) return;
+        }
 
         if ("category".equals(kind)) {
             GroupModel parent = g.getParent();
@@ -445,6 +528,7 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
         final Map<String, Boolean> units = new HashMap<>();  // "<P>_<Stufe>_<Unit>" -> is leader
         final Set<String> prefixes = new LinkedHashSet<>();
         final Set<String> kvPrefixes = new LinkedHashSet<>();
+        final Set<String> collections = new TreeSet<>();
     }
 
     private record RoleGroup(String scope, String name, Set<String> roles) {}
@@ -452,10 +536,12 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
 
     /** Parsed mapper configuration with defaults. */
     private static final class Cfg {
-        final String prefixAttr, leaderSuffix, tnSuffix;
-        final boolean emitRawRoles, emitUnits, emitEvents, includeClientRoles;
+        final String prefixAttr, leaderSuffix, tnSuffix, quotaClaim, participantQuota, defaultQuota;
+        final List<Pattern> participantGroups = new ArrayList<>();
+        final boolean emitRawRoles, emitUnits, emitStufeLeaders, emitStufeTn, emitEvents, emitCollections,
+                includeClientRoles;
         final Map<String, String> stufen, stufenleitung, aliases, eventAliases, memberTypes;
-        final Set<String> leaderRoles, excludedClientRoles;
+        final Set<String> leaderRoles, excludedClientRoles, ignoredRoles;
         final List<RoleGroup> roleGroups = new ArrayList<>();
         final List<GroupedGroup> groupedGroups = new ArrayList<>();
 
@@ -467,11 +553,24 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
             eventAliases = pairs(get(c, CFG_EVENT_ALIASES, DEF_EVENT_ALIASES));
             memberTypes = pairs(get(c, CFG_MEMBER_TYPES, DEF_MEMBER_TYPES));
             leaderRoles = new HashSet<>(split(get(c, CFG_LEADER_ROLES, DEF_LEADER_ROLES), ","));
-            excludedClientRoles = new HashSet<>(split(get(c, CFG_EXCLUDED_CLIENT_ROLES, ""), ","));            leaderSuffix = c != null && c.containsKey(CFG_LEADER_SUFFIX) ? c.get(CFG_LEADER_SUFFIX) : DEF_LEADER_SUFFIX;
+            excludedClientRoles = new HashSet<>(split(get(c, CFG_EXCLUDED_CLIENT_ROLES, ""), ","));
+            // explicitly emptied in the admin console = ignore nothing
+            ignoredRoles = new HashSet<>(split(c != null && c.containsKey(CFG_IGNORED_ROLES)
+                    ? Objects.toString(c.get(CFG_IGNORED_ROLES), "") : DEF_IGNORED_ROLES, ","));
+            quotaClaim = get(c, CFG_QUOTA_CLAIM, "").trim();
+            participantQuota = get(c, CFG_PARTICIPANT_QUOTA, DEF_PARTICIPANT_QUOTA).trim();
+            defaultQuota = get(c, CFG_DEFAULT_QUOTA, DEF_DEFAULT_QUOTA).trim();
+            for (String g : split(get(c, CFG_PARTICIPANT_GROUPS, DEF_PARTICIPANT_GROUPS), "\\|")) {
+                participantGroups.add(glob(g));
+            }
+            leaderSuffix = c != null && c.containsKey(CFG_LEADER_SUFFIX) ? c.get(CFG_LEADER_SUFFIX) : DEF_LEADER_SUFFIX;
             tnSuffix = get(c, CFG_TN_SUFFIX, DEF_TN_SUFFIX);
             emitRawRoles = bool(c, CFG_EMIT_RAW_ROLES);
             emitUnits = c != null && Boolean.parseBoolean(c.get(CFG_EMIT_UNITS)); // off unless enabled
+            emitStufeLeaders = bool(c, CFG_EMIT_STUFE_LEADERS);
+            emitStufeTn = bool(c, CFG_EMIT_STUFE_TN);
             emitEvents = bool(c, CFG_EMIT_EVENTS);
+            emitCollections = c != null && Boolean.parseBoolean(c.get(CFG_EMIT_COLLECTIONS)); // off unless enabled
             includeClientRoles = bool(c, CFG_INCLUDE_CLIENT_ROLES);
 
             for (String entry : split(get(c, CFG_ROLE_GROUPS, DEF_ROLE_GROUPS), ";")) {
