@@ -67,10 +67,25 @@ import org.keycloak.representations.IDToken;
  *      e.g. PfadiAargau_Leitende, Hochwacht_Leitende_Biberstufe
  *    Added after the grouped groups, so collection names never feed grouped-group globs.
  *
+ * 6c. Group attribute ("group_name_attribute", default "nextcloud_group"): a Keycloak group carrying
+ *    this attribute (e.g. an Abteilungs-Gremium "PR-Team" with nextcloud_group=Kommunikation) gives
+ *    every member - of the group itself, its Rollen folder or role subgroups, or any group below it -
+ *    <P>_<value>, with <P> of the Abteilung (or Kantonalverband) it belongs to. Several values can be
+ *    comma-separated. Ignored roles do not count.
+ *      Hochwacht Baden/Gremien/PR-Team  (nextcloud_group=Kommunikation) -> HochwachtBaden_Kommunikation
+ *
  * 7. Client roles (toggle "include_client_roles"): the requesting client's roles from direct
  *    user mappings and from every group the user is in plus its parents (composites expanded),
  *    emitted under their own name, e.g. KaLei, Vorstand. Attach Gremium roles to the Gremium's
  *    "Rollen" folder so they don't leak into nested Gremien.
+ *    Scoped client roles: role attribute "nextcloud_scope" on a client role decides the prefix, taken
+ *    from the group the user is in (the role can be attached to that group or any parent):
+ *      abteilung        -> <P>_<Role>            e.g. HochwachtBaden_Kommunikation
+ *      stufe            -> <P>_<Stufe>_<Role>    e.g. HochwachtBaden_Wolfsstufe_Material (only for
+ *                                                memberships inside a Stufe)
+ *      kantonalverband  -> <KvP>_<Role>          e.g. PfadiAargau_Kommunikation
+ *    abteilung falls back to the Kantonalverband for groups outside an Abteilung. A scoped role mapped
+ *    directly on the user (no group) is skipped.
  *
  * Ignored roles ("ignored_roles", last role segment, default Passivmitglied,Ehrenmitglied) are
  * skipped completely: someone with only those roles gets no groups and cannot log in.
@@ -121,6 +136,8 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
     static final String CFG_INCLUDE_CLIENT_ROLES = "include_client_roles";
     static final String CFG_EXCLUDED_CLIENT_ROLES = "excluded_client_roles";
     static final String CFG_IGNORED_ROLES = "ignored_roles";
+    static final String CFG_GROUP_ATTR = "group_name_attribute";
+    static final String CFG_SCOPE_ATTR = "scoped_role_attribute";
     static final String CFG_QUOTA_CLAIM = "quota_claim";
     static final String CFG_PARTICIPANT_GROUPS = "participant_groups";
     static final String CFG_PARTICIPANT_QUOTA = "participant_quota";
@@ -147,6 +164,8 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
     static final String DEF_EVENT_ALIASES = "Teilnehmende=TN";
     static final String DEF_MEMBER_TYPES = "Group::Elternrat=Elternrat";
     static final String DEF_IGNORED_ROLES = "Passivmitglied,Ehrenmitglied";
+    static final String DEF_GROUP_ATTR = "nextcloud_group";
+    static final String DEF_SCOPE_ATTR = "nextcloud_scope";
     static final String DEF_PARTICIPANT_GROUPS = "*_TN";
     static final String DEF_PARTICIPANT_QUOTA = "0 B";
     static final String DEF_DEFAULT_QUOTA = "default";
@@ -216,6 +235,15 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
                     .helpText("Comma-separated MiData roles that give no group at all, "
                             + "e.g. Passivmitglied,Ehrenmitglied. Users with only these roles cannot log in.")
                     .type(ProviderConfigProperty.STRING_TYPE).defaultValue(DEF_IGNORED_ROLES).add()
+                .property().name(CFG_SCOPE_ATTR).label("Scoped client role attribute")
+                    .helpText("Role attribute on client roles: abteilung -> <P>_<Role>, stufe -> <P>_<Stufe>_<Role>, "
+                            + "kantonalverband -> <KvP>_<Role>; prefix from the group the user is in. Empty = off.")
+                    .type(ProviderConfigProperty.STRING_TYPE).defaultValue(DEF_SCOPE_ATTR).add()
+                .property().name(CFG_GROUP_ATTR).label("Group name attribute")
+                    .helpText("Keycloak group attribute: every member of a group with this attribute (or of a "
+                            + "group below it) gets <Abteilung prefix>_<value>, e.g. nextcloud_group=Kommunikation "
+                            + "on a Gremium. Comma-separated values give several groups. Empty = off.")
+                    .type(ProviderConfigProperty.STRING_TYPE).defaultValue(DEF_GROUP_ATTR).add()
                 .property().name(CFG_QUOTA_CLAIM).label("Quota claim name")
                     .helpText("Empty = no quota claim. Otherwise e.g. 'quota' and in user_oidc "
                             + "--mapping-quota=quota.")
@@ -299,6 +327,9 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
             String rv = g.getFirstAttribute("role_value");
             if (rv != null && cfg.ignoredRoles.contains(lastSegment(rv))) return;
         }
+        if (!"category".equals(kind) || "roles".equals(g.getFirstAttribute("category_key"))) {
+            addAttributeGroups(g, cfg, r);
+        }
 
         if ("category".equals(kind)) {
             GroupModel parent = g.getParent();
@@ -373,6 +404,26 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
     }
 
     /**
+     * Group attribute ("nextcloud_group"): walks from the membership up to the enclosing Abteilung
+     * (or Kantonalverband, inclusive) and emits <P>_<value> for every node carrying the attribute.
+     */
+    private static void addAttributeGroups(GroupModel g, Cfg cfg, Result r) {
+        if (cfg.groupAttr.isBlank()) return;
+        GroupModel scope = findReal(g, ABTEILUNG);
+        if (scope == null) scope = findReal(g, KANTONALVERBAND);
+        if (scope == null) return;
+        String p = null;
+        for (GroupModel cur = g; cur != null; cur = cur.getParent()) {
+            String v = cur.getFirstAttribute(cfg.groupAttr);
+            if (v != null && !v.isBlank()) {
+                if (p == null) { p = prefix(scope, cfg); r.prefixes.add(p); }
+                for (String name : Cfg.split(v, ",")) r.names.add(p + "_" + sanitize(name));
+            }
+            if (cur.getId().equals(scope.getId())) break;
+        }
+    }
+
+    /**
      * Marks the Stufe (topmost node of the chain) and, if enabled, every unit in the chain.
      * A leader in a unit also counts as leader of all units above it and of the Stufe.
      * Returns the Stufe base name "<P>_<Stufe>".
@@ -443,26 +494,69 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
      * Gremium's "Rollen" folder so they don't leak into nested Gremien.
      */
     private static void addClientRoles(UserModel user, List<GroupModel> groups, ClientModel client, Cfg cfg, Result r) {
-        Set<RoleModel> roles = new HashSet<>();
-        user.getRoleMappingsStream().forEach(roles::add);
+        // Direct user mappings: no group context (scoped roles are skipped there)
+        for (RoleModel role : expand(user.getRoleMappingsStream())) emitClientRole(role, null, client, cfg, r);
+        // Group mappings: every group the user is in and its parents (normal Keycloak inheritance).
+        // The scope of a scoped role is the group the user is actually in.
         for (GroupModel g : groups) {
-            for (GroupModel cur = g; cur != null; cur = cur.getParent()) {
-                cur.getRoleMappingsStream().forEach(roles::add);
-            }
+            Set<RoleModel> roles = new HashSet<>();
+            for (GroupModel cur = g; cur != null; cur = cur.getParent()) cur.getRoleMappingsStream().forEach(roles::add);
+            for (RoleModel role : expand(roles.stream())) emitClientRole(role, g, client, cfg, r);
         }
+    }
+
+    /** Roles plus all composites they contain. */
+    private static Set<RoleModel> expand(java.util.stream.Stream<RoleModel> start) {
+        Set<RoleModel> roles = new HashSet<>();
+        start.forEach(roles::add);
         Deque<RoleModel> todo = new ArrayDeque<>(roles);
         while (!todo.isEmpty()) {
             RoleModel role = todo.pop();
-            if (role.isComposite()) {
-                role.getCompositesStream().filter(roles::add).forEach(todo::push);
+            if (role.isComposite()) role.getCompositesStream().filter(roles::add).forEach(todo::push);
+        }
+        return roles;
+    }
+
+    private static void emitClientRole(RoleModel role, GroupModel context, ClientModel client, Cfg cfg, Result r) {
+        if (!role.isClientRole() || !client.getId().equals(role.getContainerId())) return;
+        String name = role.getName();
+        if (cfg.excludedClientRoles.contains(name)) return;
+        String scoped = cfg.scopeAttr.isBlank() ? null : role.getFirstAttribute(cfg.scopeAttr);
+        if (scoped == null || scoped.isBlank()) {
+            r.names.add(name);
+            return;
+        }
+        if (context == null) return;
+        String level = scoped.trim().toLowerCase(Locale.ROOT);
+        GroupModel abteilung = findReal(context, ABTEILUNG);
+        GroupModel kv = findReal(context, KANTONALVERBAND);
+        String suffix = sanitize(name);
+
+        switch (level) {
+            case SCOPE_KV -> {
+                if (kv == null) return;
+                String p = prefix(kv, cfg);
+                r.prefixes.add(p);
+                r.names.add(p + "_" + suffix);
+            }
+            case SCOPE_STUFE -> {
+                GroupModel owner = firstReal(context);
+                if (abteilung == null || owner == null) return;
+                List<GroupModel> chain = stufeChain(owner, cfg);
+                if (chain.isEmpty()) return;               // not inside a Stufe
+                String p = prefix(abteilung, cfg);
+                r.prefixes.add(p);
+                String stufe = cfg.stufen.get(chain.get(chain.size() - 1).getFirstAttribute("group_type"));
+                r.names.add(p + "_" + stufe + "_" + suffix);
+            }
+            default -> {                                   // "abteilung" (and any other value)
+                GroupModel scope = abteilung != null ? abteilung : kv;
+                if (scope == null) return;
+                String p = prefix(scope, cfg);
+                r.prefixes.add(p);
+                r.names.add(p + "_" + suffix);
             }
         }
-        roles.stream()
-                .filter(RoleModel::isClientRole)
-                .filter(role -> client.getId().equals(role.getContainerId()))
-                .map(RoleModel::getName)
-                .filter(name -> !cfg.excludedClientRoles.contains(name))
-                .forEach(r.names::add);
     }
 
     /** First ancestor (incl. self) that is a real MiData group of the given type. */
@@ -536,7 +630,7 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
 
     /** Parsed mapper configuration with defaults. */
     private static final class Cfg {
-        final String prefixAttr, leaderSuffix, tnSuffix, quotaClaim, participantQuota, defaultQuota;
+        final String prefixAttr, leaderSuffix, tnSuffix, quotaClaim, participantQuota, defaultQuota, groupAttr, scopeAttr;
         final List<Pattern> participantGroups = new ArrayList<>();
         final boolean emitRawRoles, emitUnits, emitStufeLeaders, emitStufeTn, emitEvents, emitCollections,
                 includeClientRoles;
@@ -557,6 +651,11 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
             // explicitly emptied in the admin console = ignore nothing
             ignoredRoles = new HashSet<>(split(c != null && c.containsKey(CFG_IGNORED_ROLES)
                     ? Objects.toString(c.get(CFG_IGNORED_ROLES), "") : DEF_IGNORED_ROLES, ","));
+            // explicitly emptied in the admin console = off
+            groupAttr = (c != null && c.containsKey(CFG_GROUP_ATTR)
+                    ? Objects.toString(c.get(CFG_GROUP_ATTR), "") : DEF_GROUP_ATTR).trim();
+            scopeAttr = (c != null && c.containsKey(CFG_SCOPE_ATTR)
+                    ? Objects.toString(c.get(CFG_SCOPE_ATTR), "") : DEF_SCOPE_ATTR).trim();
             quotaClaim = get(c, CFG_QUOTA_CLAIM, "").trim();
             participantQuota = get(c, CFG_PARTICIPANT_QUOTA, DEF_PARTICIPANT_QUOTA).trim();
             defaultQuota = get(c, CFG_DEFAULT_QUOTA, DEF_DEFAULT_QUOTA).trim();
