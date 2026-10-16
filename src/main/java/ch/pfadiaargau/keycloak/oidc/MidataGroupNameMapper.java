@@ -58,6 +58,10 @@ import org.keycloak.representations.IDToken;
  *
  * 5. Events (toggle "emit_events"): member of a category below a node_kind=event group
  *      -> <EventName>_<Category>   e.g. AG251-26_Leitung, AG251-26_TN ("event_category_aliases")
+ *    Event collections ("event_collections"): EventRegex/CategoryRegex=Name entries separated by ';'.
+ *    EventRegex must match the whole event name, CategoryRegex the category name or category_key;
+ *    without '/' any event matches. A match adds <KvP>_<Name> (independent of "emit_events").
+ *      (AG|SO)\d{3}-\d{2}/Leitung=Kursleitende -> PfadiAargau_Kursleitende
  *
  * 6. Member types ("member_types"): any member of a node of that group_type inside an Abteilung
  *      Group::Elternrat=Elternrat -> Hochwacht_Elternrat
@@ -78,7 +82,7 @@ import org.keycloak.representations.IDToken;
  *    user mappings and from every group the user is in plus its parents (composites expanded),
  *    emitted under their own name, e.g. KaLei, Vorstand. Attach Gremium roles to the Gremium's
  *    "Rollen" folder so they don't leak into nested Gremien.
- *    Scoped client roles: role attribute "nextcloud_scope" on a client role decides the prefix, taken
+ *    Scoped client roles: role attribute ("scoped_role_attribute", default "group_scope") decides the prefix, taken
  *    from the group the user is in (the role can be attached to that group or any parent):
  *      abteilung        -> <P>_<Role>            e.g. HochwachtBaden_Kommunikation
  *      stufe            -> <P>_<Stufe>_<Role>    e.g. HochwachtBaden_Wolfsstufe_Material (only for
@@ -133,6 +137,7 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
     static final String CFG_EMIT_EVENTS = "emit_events";
     static final String CFG_EMIT_COLLECTIONS = "emit_collections";
     static final String CFG_EVENT_ALIASES = "event_category_aliases";
+    static final String CFG_EVENT_COLLECTIONS = "event_collections";
     static final String CFG_INCLUDE_CLIENT_ROLES = "include_client_roles";
     static final String CFG_EXCLUDED_CLIENT_ROLES = "excluded_client_roles";
     static final String CFG_IGNORED_ROLES = "ignored_roles";
@@ -165,7 +170,7 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
     static final String DEF_MEMBER_TYPES = "Group::Elternrat=Elternrat";
     static final String DEF_IGNORED_ROLES = "Passivmitglied,Ehrenmitglied";
     static final String DEF_GROUP_ATTR = "nextcloud_group";
-    static final String DEF_SCOPE_ATTR = "nextcloud_scope";
+    static final String DEF_SCOPE_ATTR = "group_scope";
     static final String DEF_PARTICIPANT_GROUPS = "*_TN";
     static final String DEF_PARTICIPANT_QUOTA = "0 B";
     static final String DEF_DEFAULT_QUOTA = "default";
@@ -225,6 +230,11 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
                     .type(ProviderConfigProperty.BOOLEAN_TYPE).defaultValue("false").add()
                 .property().name(CFG_EVENT_ALIASES).label("Event category aliases (CategoryName=Suffix)")
                     .type(ProviderConfigProperty.STRING_TYPE).defaultValue(DEF_EVENT_ALIASES).add()
+                .property().name(CFG_EVENT_COLLECTIONS).label("Event collection groups (EventRegex/CategoryRegex=Name)")
+                    .helpText("EventRegex/CategoryRegex=Name, separated by ';'. Members of a matching event category also get "
+                            + "<KvPrefix>_<Name>, e.g. (AG|SO)\\d{3}-\\d{2}/Leitung=Kursleitende. "
+                            + "Category regex matches name or category_key; without '/' any event matches.")
+                    .type(ProviderConfigProperty.STRING_TYPE).defaultValue("").add()
                 .property().name(CFG_INCLUDE_CLIENT_ROLES).label("Include client roles")
                     .helpText("Add the requesting client's roles (direct, via groups and parent groups).")
                     .type(ProviderConfigProperty.BOOLEAN_TYPE).defaultValue("true").add()
@@ -336,6 +346,13 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
             // Events: Anlässe/<Event>/<Category>
             if (parent != null && "event".equals(parent.getFirstAttribute("node_kind"))) {
                 if (cfg.emitEvents) r.names.add(sanitize(parent.getName()) + "_" + cfg.eventAlias(g.getName()));
+                GroupModel kv = findReal(parent, KANTONALVERBAND);
+                if (kv != null) {
+                    for (String collection : cfg.eventCollections(parent.getName(), g.getName(),
+                            g.getFirstAttribute("category_key"))) {
+                        r.names.add(prefix(kv, cfg) + "_" + sanitize(collection));
+                    }
+                }
                 return;
             }
             // A "Rollen" folder membership (roles without own subgroup, e.g. Wolf, Elternrat member)
@@ -627,6 +644,7 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
 
     private record RoleGroup(String scope, String name, Set<String> roles) {}
     private record GroupedGroup(String scope, String name, List<Pattern> members) {}
+    private record EventCollection(Pattern event, Pattern category, String name) {}
 
     /** Parsed mapper configuration with defaults. */
     private static final class Cfg {
@@ -638,6 +656,7 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
         final Set<String> leaderRoles, excludedClientRoles, ignoredRoles;
         final List<RoleGroup> roleGroups = new ArrayList<>();
         final List<GroupedGroup> groupedGroups = new ArrayList<>();
+        final List<EventCollection> eventCollections = new ArrayList<>();
 
         Cfg(Map<String, String> c) {
             prefixAttr = get(c, CFG_PREFIX_ATTR, DEF_PREFIX_ATTR);
@@ -645,6 +664,20 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
             stufenleitung = pairs(get(c, CFG_STUFENLEITUNG, DEF_STUFENLEITUNG));
             aliases = pairs(get(c, CFG_ROLE_ALIASES, DEF_ROLE_ALIASES));
             eventAliases = pairs(get(c, CFG_EVENT_ALIASES, DEF_EVENT_ALIASES));
+            // EventRegex/CategoryRegex=Name;...   (regex may contain ',' and '|', so ';' separates entries)
+            for (String entry : split(get(c, CFG_EVENT_COLLECTIONS, ""), ";")) {
+                int eq = entry.lastIndexOf('=');
+                if (eq <= 0 || eq == entry.length() - 1) continue;
+                String left = entry.substring(0, eq).trim(), name = entry.substring(eq + 1).trim();
+                int slash = left.indexOf('/');
+                String ev = slash < 0 ? ".*" : left.substring(0, slash).trim();
+                String cat = slash < 0 ? left : left.substring(slash + 1).trim();
+                try {
+                    eventCollections.add(new EventCollection(Pattern.compile(ev), Pattern.compile(cat), name));
+                } catch (java.util.regex.PatternSyntaxException e) {
+                    // invalid regex: entry ignored
+                }
+            }
             memberTypes = pairs(get(c, CFG_MEMBER_TYPES, DEF_MEMBER_TYPES));
             leaderRoles = new HashSet<>(split(get(c, CFG_LEADER_ROLES, DEF_LEADER_ROLES), ","));
             excludedClientRoles = new HashSet<>(split(get(c, CFG_EXCLUDED_CLIENT_ROLES, ""), ","));
@@ -698,6 +731,18 @@ public class MidataGroupNameMapper extends AbstractOIDCProtocolMapper
         }
 
         String alias(String roleName) { return aliases.getOrDefault(roleName, roleName); }
+
+        /** Names of all event collections matching this event and category (name or category_key). */
+        List<String> eventCollections(String eventName, String categoryName, String categoryKey) {
+            List<String> out = new ArrayList<>();
+            for (EventCollection ec : eventCollections) {
+                if (!ec.event().matcher(eventName).matches()) continue;
+                boolean cat = ec.category().matcher(categoryName).matches()
+                        || (categoryKey != null && ec.category().matcher(categoryKey).matches());
+                if (cat) out.add(ec.name());
+            }
+            return out;
+        }
         String eventAlias(String category) { return sanitize(eventAliases.getOrDefault(category, category)); }
 
         /** Booleans default to true when not configured. */
